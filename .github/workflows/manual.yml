@@ -7,6 +7,9 @@ name: Manual build-workflow
 on:
   workflow_dispatch:
 
+env:
+  BOOST_VER: 1.89.0
+
 # A workflow run is made up of one or more jobs that can run sequentially or in parallel
 jobs:
   build-linux:
@@ -21,14 +24,37 @@ jobs:
           sudo apt-get update
           sudo apt-get install -y cmake build-essential gettext git pkg-config 
 
-      - name: Build & Install Boost
+      - uses: kenchan0130/actions-system-info@master
+        id: system-info
+
+      - name: Restore Boost from Cache
+        id: restore-cache-Boost
+        uses: actions/cache/restore@v4
+        with:
+          path: ~/boost-${{env.BOOST_VER}}
+          key: ${{ runner.os }}-${{ steps.system-info.outputs.name }}-${{ steps.system-info.outputs.release }}-Boost-${{ env.BOOST_VER }}
+
+      - name: Build Boost
+        if: steps.restore-cache-Boost.outputs.cache-hit != 'true'
         run: |
           cd ~
-          wget https://github.com/boostorg/boost/releases/download/boost-1.89.0/boost-1.89.0-cmake.tar.xz
-          tar -xJf boost-1.89.0-cmake.tar.xz
-          cd boost-1.89.0
+          wget https://github.com/boostorg/boost/releases/download/boost-${{env.BOOST_VER}}/boost-${{env.BOOST_VER}}-cmake.tar.xz
+          tar -xJf boost-${{env.BOOST_VER}}-cmake.tar.xz
+          cd boost-${{env.BOOST_VER}}
           cmake -S . -B build -DCMAKE_BUILD_TYPE=Release -DBOOST_RUNTIME_LINK=static -DBUILD_SHARED_LIBS=OFF
           cmake --build build
+
+      - name: Save Boost to Cache
+        if: steps.restore-cache-Boost.outputs.cache-hit != 'true'
+        id: save-cache-Boost
+        uses: actions/cache/save@v4
+        with:
+          path: ~/boost-${{env.BOOST_VER}}
+          key: ${{ runner.os }}-${{ steps.system-info.outputs.name }}-${{ steps.system-info.outputs.release }}-Boost-${{ env.BOOST_VER }}
+
+      - name: Install Boost
+        run: |
+          cd ~/boost-${{env.BOOST_VER}}
           sudo cmake --build build --target install
           
       - uses: actions/checkout@v4
@@ -45,11 +71,10 @@ jobs:
           echo "artifact_name=dompdfcli" >> $GITHUB_OUTPUT
 
       - name: Upload artifact
-        uses: actions/upload-artifact@v4
+        uses: actions/upload-artifact@v4.6.2
         with:
           name: ${{ steps.build-project.outputs.artifact_name }}
           path: build/${{ steps.build-project.outputs.artifact_name }}
           compression-level: 0
 
-
-          
+  
