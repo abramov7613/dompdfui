@@ -23,7 +23,7 @@ namespace asio = boost::asio;
 
 int parse_cli_args(int argc, char** argv, po::variables_map& opts) ;
 void html2pdf(const po::variables_map& opts) ;
-void extract_embedded_resources() ;
+void extract_embedded_resources(const po::variables_map& opts) ;
 fs::path temp_path() ;
 
 int main(int argc, char** argv)
@@ -33,7 +33,7 @@ int main(int argc, char** argv)
     po::variables_map opts;
     auto parse_cli_args_result = parse_cli_args(argc, argv, opts) ;
     if( parse_cli_args_result!=1 ) return parse_cli_args_result ;
-    extract_embedded_resources();
+    extract_embedded_resources(opts);
     html2pdf(opts);
     //...
 
@@ -67,6 +67,7 @@ int parse_cli_args(int argc, char** argv, po::variables_map& vm)
     po::options_description popts("Program Options");
     popts.add_options()
         ("no-clean,n", po::bool_switch(), "don't clean temp files on exit")
+        ("php-memory-limit,m", po::value<unsigned long long>()->default_value(268435456), "Limits the amount of memory (in bytes) a php-cli can use.")
         ("help,h", "view this help message")
         ("version,v", "print version")
         ;
@@ -95,9 +96,9 @@ int parse_cli_args(int argc, char** argv, po::variables_map& vm)
         ("fontCache", po::value<std::string>())
         ("logOutputFile", po::value<std::string>())
         ("defaultMediaType", po::value<std::string>()->default_value("screen"))
-        ("defaultPaperSize", po::value<std::string>()->default_value("letter"))
+        ("defaultPaperSize", po::value<std::string>()->default_value("a4"))
         ("defaultPaperOrientation", po::value<std::string>()->default_value("portrait"))
-        ("defaultFont", po::value<std::string>()->default_value("serif"))
+        ("defaultFont", po::value<std::string>()->default_value("dejavu serif"))
         ("pdfBackend", po::value<std::string>()->default_value("CPDF"))
         ("pdflibLicense", po::value<std::string>())
         ("chroot", po::value<std::vector<std::string>>())
@@ -122,6 +123,7 @@ int parse_cli_args(int argc, char** argv, po::variables_map& vm)
         nw::cout << short_descr << ' ' << git_tag_str << '\n'
                  << "build time: " << build_time_str << '\n'
                  << "git hash: " << git_hash_str << "\nusing:\n"
+                 << "GCC v" << __VERSION__ << '\n'
                  << "boost v" << BOOST_VERSION / 100000 << '.'
                               << BOOST_VERSION / 100 % 1000 << '.'
                               << BOOST_VERSION % 100 << '\n'
@@ -245,7 +247,7 @@ void html2pdf(const po::variables_map& opts)
   bp::process proc (
        ctx,
       "php.exe",
-       {script_path.filename().string()},
+       {"-c", ".", script_path.filename().string()},
        bp::process_start_dir{temp_path().string()},
        bp::process_stdio{{/*in to default*/}, stdout, stdout}
   );
@@ -262,7 +264,7 @@ fs::path temp_path()
 }
 
 // function extract embedded resources
-void extract_embedded_resources()
+void extract_embedded_resources(const po::variables_map& opts)
 {
   auto php_rsc_p = embedded::resource<"php.exe">().data();
   auto php_rsc_sz = embedded::resource<"php.exe">().size();
@@ -281,6 +283,11 @@ void extract_embedded_resources()
   php_exe_target_path /= "php.exe" ;
   if(!fs::exists(php_exe_target_path)) {
     extract(php_rsc_p, php_rsc_sz, php_exe_target_path) ;
+    auto php_ini_path = temp_path() / "php.ini";
+    nw::ofstream phpini ( php_ini_path );
+    if(!phpini.is_open()) throw std::runtime_error("Can't open file: " + php_ini_path.string()) ;
+    phpini << "memory_limit=" << opts["php-memory-limit"].as<unsigned long long>() << '\n';
+    phpini.close();
 #if BOOST_OS_UNIX
     fs::permissions(php_exe_target_path, fs::perms::owner_all | fs::perms::group_all, fs::perm_options::add);
 #endif

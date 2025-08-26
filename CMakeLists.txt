@@ -106,9 +106,9 @@ add_custom_command(
       -D URL_LINUX=https://dl.static-php.dev/static-php-cli/bulk/php-8.4.11-cli-linux-x86_64.tar.gz
       -D URL_WINDOWS=https://dl.static-php.dev/static-php-cli/windows/spc-max/php-8.4.11-cli-win.zip
       -D HASH_LINUX=556bd531fd4f7b9ea3c2b6743e94eeb35c458d61464aee662fcf15e0fde6ea94
-      -D HASH_WINDOWS=f463de9dc5ef57ff3203028e7892644e67a46725408630565042d4d17c56e963
+      -D HASH_WINDOWS=02090fe570c5fa2adcfdf06310ba2dbadba72cf56a0bd4de9e7a1c26623bdc62
       -D EXE_HASH_LINUX=e60f8ce58554a2f3f59f6e8df664a75ad8d889f23dc9611d803b17cd0ac51c81
-      -D EXE_HASH_WINDOWS=51972d28ed45a87d06a4b67583f6cf1a8918ae26ebf38657e1c25579f7d1329c
+      -D EXE_HASH_WINDOWS=e471df4804f5705d1a66653379d379d8ff649012710cc11b3a2f9fd223760d80
       -D EXTERN_DIR=${CMAKE_CURRENT_SOURCE_DIR}/external
       -D OUTPUT=${PHP_EXE_PATH}
       -P "${CMAKE_CURRENT_SOURCE_DIR}/get_phpcli.cmake"
