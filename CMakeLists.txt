@@ -105,7 +105,7 @@ add_custom_command(
     ${CMAKE_COMMAND}
       -D URL_LINUX=https://dl.static-php.dev/static-php-cli/bulk/php-8.4.11-cli-linux-x86_64.tar.gz
       -D URL_WINDOWS=https://dl.static-php.dev/static-php-cli/windows/spc-max/php-8.4.11-cli-win.zip
-      -D HASH_LINUX=77016e669ada9d0562f353edc2e070eb2bcef73c061c541d423ad448aeb0ad1b
+      -D HASH_LINUX=556bd531fd4f7b9ea3c2b6743e94eeb35c458d61464aee662fcf15e0fde6ea94
       -D HASH_WINDOWS=f463de9dc5ef57ff3203028e7892644e67a46725408630565042d4d17c56e963
       -D EXE_HASH_LINUX=ac866d8328e67ec5a4009462fb8bd48e67ac29474edc626494272d75d2764cdf
       -D EXE_HASH_WINDOWS=51972d28ed45a87d06a4b67583f6cf1a8918ae26ebf38657e1c25579f7d1329c
