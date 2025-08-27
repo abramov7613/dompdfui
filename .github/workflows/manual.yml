@@ -119,7 +119,7 @@ jobs:
       - name: Build project
         id: build-project
         run: |
-          cmake -S . -B build -DCMAKE_BUILD_TYPE=Release 
+          cmake -G "MinGW Makefiles" -S . -B build -DCMAKE_BUILD_TYPE=Release 
           cmake --build build 
 
       - name: Upload Windows Artifact
