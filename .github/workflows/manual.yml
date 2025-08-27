@@ -86,7 +86,7 @@ jobs:
         run: |
           cd C:
           iwr -outf cmake-4.1.0-windows-x86_64.msi https://github.com/Kitware/CMake/releases/download/v4.1.0/cmake-4.1.0-windows-x86_64.msi
-          cmake-4.1.0-windows-x86_64.msi /quiet
+          C:\cmake-4.1.0-windows-x86_64.msi /quiet
         
       - name: Restore Boost from Cache
         id: restore-cache-Boost
