@@ -67,14 +67,65 @@ jobs:
           cd $GITHUB_WORKSPACE
           cmake -S . -B build -DCMAKE_BUILD_TYPE=Release 
           cmake --build build 
-          cd build
-          echo "artifact_name=dompdfcli" >> $GITHUB_OUTPUT
 
       - name: Upload artifact
         uses: actions/upload-artifact@v4.6.2
         with:
-          name: ${{ steps.build-project.outputs.artifact_name }}
-          path: build/${{ steps.build-project.outputs.artifact_name }}
+          name: dompdfcli_linux_x64
+          path: build/dompdfcli
           compression-level: 0
 
-  
+
+  build-windows:
+    runs-on: windows-latest
+    steps:
+      - uses: kenchan0130/actions-system-info@master
+        id: system-info
+        
+      - name: Restore Boost from Cache
+        id: restore-cache-Boost
+        uses: actions/cache/restore@v4
+        with:
+          path: C:\boost-${{env.BOOST_VER}}
+          key: ${{ runner.os }}-${{ steps.system-info.outputs.name }}-${{ steps.system-info.outputs.release }}-Boost-${{ env.BOOST_VER }}
+          
+      - name: Build Boost
+        if: steps.restore-cache-Boost.outputs.cache-hit != 'true'
+        run: |
+          cd C:
+          iwr -outf boost-${{env.BOOST_VER}}.zip https://github.com/boostorg/boost/releases/download/boost-1.89.0/boost-1.89.0-cmake.zip
+          unzip boost-${{env.BOOST_VER}}.zip
+          cd boost-${{env.BOOST_VER}}
+          cmake -G "MinGW Makefiles" -S . -B build -DCMAKE_BUILD_TYPE=Release -DBOOST_RUNTIME_LINK=static -DBUILD_SHARED_LIBS=OFF
+          cmake --build build
+          
+      - name: Save Boost to Cache
+        if: steps.restore-cache-Boost.outputs.cache-hit != 'true'
+        id: save-cache-Boost
+        uses: actions/cache/save@v4
+        with:
+          path: C:\boost-${{env.BOOST_VER}}
+          key: ${{ runner.os }}-${{ steps.system-info.outputs.name }}-${{ steps.system-info.outputs.release }}-Boost-${{ env.BOOST_VER }}
+
+      - name: Install Boost
+        run: |
+          cd C:\boost-${{env.BOOST_VER}}
+          cmake --build build --target install
+          
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+
+      - name: Build project
+        id: build-project
+        run: |
+          cmake -S . -B build -DCMAKE_BUILD_TYPE=Release 
+          cmake --build build 
+
+      - name: Upload Windows Artifact
+        uses: actions/upload-artifact@v4
+        with:
+          name: windows_x64_portable
+          path: build\dompdfcli.exe
+          compression-level: 0
+
