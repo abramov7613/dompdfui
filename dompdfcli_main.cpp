@@ -245,7 +245,7 @@ void html2pdf(const po::variables_map& opts)
 
   asio::io_context ctx;
   bp::process proc (
-       ctx,
+       ctx.get_executor(),
       "php.exe",
        {"-c", ".", script_path.filename().string()},
        bp::process_start_dir{temp_path().string()},
@@ -313,7 +313,7 @@ void extract_embedded_resources(const po::variables_map& opts)
       unzipscript.close();
       asio::io_context ctx;
       bp::process_start_dir dir (temp_path().string()) ;
-      bp::process proc(ctx, "php.exe", {"unzip.php"}, dir);
+      bp::process proc(ctx.get_executor(), "php.exe", {"unzip.php"}, dir);
       if(proc.wait()) throw std::runtime_error("Can't unzip 'dompdf.zip' file");
     }
   }
