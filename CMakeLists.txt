@@ -1,4 +1,4 @@
-cmake_minimum_required(VERSION 3.25)
+cmake_minimum_required(VERSION 3.31)
 
 # Only this generators supported for this project
 set(PROJECT_SUPPORTED_GENERATORS_LIST
