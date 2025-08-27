@@ -84,7 +84,7 @@ target_include_directories(md5_lib PUBLIC $<BUILD_INTERFACE:${md5_lib_SOURCE_DIR
 add_executable(resource_generator embed_main.cpp)
 target_compile_features(resource_generator PRIVATE cxx_std_20)
 target_include_directories(resource_generator PRIVATE ${Boost_INCLUDE_DIRS})
-target_link_libraries(resource_generator PRIVATE Boost::program_options)
+target_link_libraries(resource_generator PRIVATE Boost::program_options Boost::nowide)
 set(PHP_EXE_PATH "${CMAKE_CURRENT_SOURCE_DIR}/external/php.exe")
 set(DOMPDF_ZIP_PATH "${CMAKE_CURRENT_SOURCE_DIR}/external/dompdf.zip")
 add_custom_command(
