@@ -140,7 +140,7 @@ target_compile_definitions(dompdfcli PRIVATE
 )
 target_include_directories(dompdfcli PRIVATE ${Boost_INCLUDE_DIRS})
 target_link_libraries(dompdfcli PRIVATE
-    ${Boost_LIBRARIES}
+    Boost::program_options
     embedded_resources
     cmake_timestamp
     -static
