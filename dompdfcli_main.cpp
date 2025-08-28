@@ -18,7 +18,7 @@
 namespace po = boost::program_options;
 namespace fs = std::filesystem ;
 namespace nw = boost::nowide;
-namespace bp = boost::process;
+namespace bp = boost::process::v2;
 namespace asio = boost::asio;
 
 int parse_cli_args(int argc, char** argv, po::variables_map& opts) ;
