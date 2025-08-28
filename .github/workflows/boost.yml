@@ -25,10 +25,9 @@ jobs:
         iwr -outf boost-${{env.BOOST_VER}}.zip https://archives.boost.io/release/1.89.0/source/boost_1_89_0.zip
         unzip boost-${{env.BOOST_VER}}.zip
         cd boost_1_89_0
-        mkdir build
-        bootstrap
+        bootstrap.bat
         b2 --help
-        b2 --build-dir=build toolset=gcc --build-type=complete
+        
           
 
 
