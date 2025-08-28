@@ -126,7 +126,7 @@ jobs:
       - name: Build project
         id: build-project
         run: |
-          cmake -G "MinGW Makefiles" -S . -B build -DCMAKE_BUILD_TYPE=Release -DBoost_DIR="C:/Boost/lib/cmake/Boost-${{ env.BOOST_VER }}"
+          cmake -G "MinGW Makefiles" -S . -B build -DCMAKE_BUILD_TYPE=Release -DBoost_DIR="C:/Boost/lib/cmake/Boost-${{ env.BOOST_VER }}" -DCMAKE_TLS_VERIFY=OFF
           cmake --build build 
 
       - name: Upload Windows Artifact
