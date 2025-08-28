@@ -99,7 +99,7 @@ jobs:
         if: steps.restore-cache-Boost.outputs.cache-hit != 'true'
         run: |
           cd C:
-          iwr -outf boost-${{env.BOOST_VER}}.zip https://github.com/boostorg/boost/releases/download/boost-${{env.BOOST_VER}}/boost-${{env.BOOST_VER}}-cmake.tar.xz
+          iwr -outf boost-${{env.BOOST_VER}}.zip https://github.com/boostorg/boost/releases/download/boost-${{env.BOOST_VER}}/boost-${{env.BOOST_VER}}-cmake.zip
           unzip boost-${{env.BOOST_VER}}.zip
           cd boost-${{env.BOOST_VER}}
           cmake -G "MinGW Makefiles" -S . -B build -DCMAKE_BUILD_TYPE=Release -DBOOST_RUNTIME_LINK=static -DBUILD_SHARED_LIBS=OFF
