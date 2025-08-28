@@ -8,7 +8,7 @@ on:
   workflow_dispatch:
 
 env:
-  BOOST_VER: 1.85.0
+  BOOST_VER: 1.89.0
 
 # A workflow run is made up of one or more jobs that can run sequentially or in parallel
 jobs:
@@ -103,7 +103,7 @@ jobs:
           iwr -outf boost-${{env.BOOST_VER}}.zip https://github.com/boostorg/boost/releases/download/boost-${{env.BOOST_VER}}/boost-${{env.BOOST_VER}}-cmake.zip
           unzip boost-${{env.BOOST_VER}}.zip
           cd boost-${{env.BOOST_VER}}
-          cmake -G "MinGW Makefiles" -S . -B build -DCMAKE_BUILD_TYPE=Release -DBOOST_RUNTIME_LINK=static -DBUILD_SHARED_LIBS=OFF
+          cmake -G "MinGW Makefiles" -S . -B build -DCMAKE_BUILD_TYPE=Release -DBOOST_RUNTIME_LINK=static -DBUILD_SHARED_LIBS=OFF -DBOOST_INCLUDE_LIBRARIES=program_options;nowide;process;predef;tokenizer
           cmake --build build
 
       - name: Save Boost to Cache
