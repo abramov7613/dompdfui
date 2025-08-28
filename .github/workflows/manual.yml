@@ -95,7 +95,7 @@ jobs:
       - name: Build project
         id: build-project
         run: |
-          cmake -G "MinGW Makefiles" -S . -B build -DCMAKE_BUILD_TYPE=Release -DBoost_DIR=C:/Boost/lib/cmake/Boost-1.89.0
+          cmake -G "MinGW Makefiles" -S . -B build -DCMAKE_BUILD_TYPE=Release 
           cmake --build build 
 
       - name: Upload Windows Artifact
