@@ -142,12 +142,7 @@ target_compile_definitions(dompdfcli PRIVATE
 )
 target_include_directories(dompdfcli PRIVATE ${Boost_INCLUDE_DIRS})
 target_link_libraries(dompdfcli PRIVATE
-    Boost::program_options
-    Boost::nowide 
-    Boost::process 
-    Boost::asio 
-    Boost::predef 
-    Boost::tokenizer
+    ${Boost_LIBRARIES}
     embedded_resources
     cmake_timestamp
     -static
