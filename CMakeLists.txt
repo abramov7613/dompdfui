@@ -145,6 +145,7 @@ target_link_libraries(dompdfcli PRIVATE
     ${Boost_LIBRARIES}
     embedded_resources
     cmake_timestamp
+    $<$<PLATFORM_ID:Windows>:ws2_32>
     -static
 )
 
