@@ -1,4 +1,4 @@
-#include <boost/asio.hpp>
+//#include <boost/asio.hpp>
 #include <boost/nowide/args.hpp>
 #include <boost/nowide/fstream.hpp>
 #include <boost/nowide/iostream.hpp>
@@ -18,8 +18,8 @@
 namespace po = boost::program_options;
 namespace fs = std::filesystem ;
 namespace nw = boost::nowide;
-namespace bp = boost::process::v2;
-namespace asio = boost::asio;
+namespace bp = boost::process::v1;
+//namespace asio = boost::asio;
 
 int parse_cli_args(int argc, char** argv, po::variables_map& opts) ;
 void html2pdf(const po::variables_map& opts) ;
@@ -242,7 +242,7 @@ void html2pdf(const po::variables_map& opts)
     "$output = $dompdf->output();\n"
     "file_put_contents(\"" << tmpto_path.filename().string() << "\", $output);\n" ;
   script.close();
-
+/*
   asio::io_context ctx;
   bp::process proc (
        ctx.get_executor(),
@@ -250,8 +250,17 @@ void html2pdf(const po::variables_map& opts)
        {"-c", ".", script_path.filename().string()},
        bp::process_start_dir{temp_path().string()},
        bp::process_stdio{{/*in to default*/}, stdout, stdout}
+  );*/
+  bp::child proc(
+       bp::exe="php.exe",
+       bp::args={"-c", ".", script_path.filename().string()}
+       bp::start_dir=temp_path().string()
+       bp::std_out > stdout,
+       bp::std_err > stdout,
+       bp::std_in < bp::null
   );
-  if(proc.wait()) throw std::runtime_error("Can't execute script file: " + script_path.string());
+  proc.wait();
+  if(proc.exit_code()) throw std::runtime_error("Can't execute script file: " + script_path.string());
   if(!fs::copy_file(tmpto_path, to_path, fs::copy_options::overwrite_existing))
     throw std::runtime_error("Can't write to file: " + to_path.string());
 }
