@@ -1,6 +1,6 @@
 # This is a basic workflow that is manually triggered
 
-name: Manual workflow
+name: boost
 
 # Controls when the action will run. Workflow runs when manually triggered using the UI
 # or API.
@@ -11,7 +11,7 @@ env:
   BOOST_MA_V: 1
   BOOST_MI_V: 89
   BOOST_PA_V: 0
-  BOOST_VER: ${{BOOST_MA_V}}.${{BOOST_MI_V}.${{BOOST_PA_V}
+  BOOST_VER: 1.89.0
 
 
 # A workflow run is made up of one or more jobs that can run sequentially or in parallel
@@ -19,15 +19,16 @@ jobs:
   build-boost:
     runs-on: windows-latest
     steps:
-    
     - name: Build Boost 
       run: |
-          cd C:
-          iwr -outf boost-${{env.BOOST_VER}}.zip https://archives.boost.io/release/${{BOOST_MA_V}}.${{BOOST_MI_V}.${{BOOST_PA_V}/source/boost_${{BOOST_MA_V}}_${{BOOST_MI_V}_${{BOOST_PA_V}.zip
-          unzip boost-${{env.BOOST_VER}}.zip
-          cd boost_${{BOOST_MA_V}}_${{BOOST_MI_V}_${{BOOST_PA_V}
-          mkdir build
-          bootstrap
-          b2 --help
-          b2 --build-dir=build toolset=gcc --build-type=complete
+        cd C:
+        iwr -outf boost-${{env.BOOST_VER}}.zip https://archives.boost.io/release/${{BOOST_MA_V}}.${{BOOST_MI_V}.${{BOOST_PA_V}/source/boost_${{BOOST_MA_V}}_${{BOOST_MI_V}_${{BOOST_PA_V}.zip
+        unzip boost-${{env.BOOST_VER}}.zip
+        cd boost_${{BOOST_MA_V}}_${{BOOST_MI_V}_${{BOOST_PA_V}
+        mkdir build
+        bootstrap
+        b2 --help
+        b2 --build-dir=build toolset=gcc --build-type=complete
           
+
+
