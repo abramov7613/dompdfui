@@ -87,37 +87,7 @@ jobs:
           cd C:
           iwr -outf cmake-4.1.0-windows-x86_64.msi https://github.com/Kitware/CMake/releases/download/v4.1.0/cmake-4.1.0-windows-x86_64.msi
           C:\cmake-4.1.0-windows-x86_64.msi /quiet
-        
-      - name: Restore Boost from Cache
-        id: restore-cache-Boost
-        uses: actions/cache/restore@v4
-        with:
-          path: C:\boost-${{env.BOOST_VER}}
-          key: ${{ runner.os }}-${{ steps.system-info.outputs.name }}-${{ steps.system-info.outputs.release }}-Boost-${{ env.BOOST_VER }}
-          
-      - name: Build Boost
-        if: steps.restore-cache-Boost.outputs.cache-hit != 'true'
-        run: |
-          cd C:
-          iwr -outf boost-${{env.BOOST_VER}}.zip https://github.com/boostorg/boost/releases/download/boost-${{env.BOOST_VER}}/boost-${{env.BOOST_VER}}-cmake.zip
-          unzip boost-${{env.BOOST_VER}}.zip
-          cd boost-${{env.BOOST_VER}}
-          cmake -G "MinGW Makefiles" -S . -B build -DCMAKE_BUILD_TYPE=Release -DBOOST_RUNTIME_LINK=static -DBUILD_SHARED_LIBS=OFF
-          cmake --build build
-          
-      - name: Save Boost to Cache
-        if: steps.restore-cache-Boost.outputs.cache-hit != 'true'
-        id: save-cache-Boost
-        uses: actions/cache/save@v4
-        with:
-          path: C:\boost-${{env.BOOST_VER}}
-          key: ${{ runner.os }}-${{ steps.system-info.outputs.name }}-${{ steps.system-info.outputs.release }}-Boost-${{ env.BOOST_VER }}
 
-      - name: Install Boost
-        run: |
-          cd C:\boost-${{env.BOOST_VER}}
-          cmake --build build --target install
-          
       - uses: actions/checkout@v4
         with:
           fetch-depth: 0
