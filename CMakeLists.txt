@@ -94,6 +94,7 @@ add_custom_command(
       -D URL=https://github.com/dompdf/dompdf/releases/download/v3.1.0/dompdf-3.1.0.zip
       -D HASH=cafb29ad27308660e1650ff54c9c4ffc67a289afb89a59d754d6649c58bd7ad1
       -D OUTPUT=${DOMPDF_ZIP_PATH}
+      -D CMAKE_TLS_VERIFY=${CMAKE_TLS_VERIFY}
       -P "${CMAKE_CURRENT_SOURCE_DIR}/get_dompdf.cmake"
   DEPENDS
     "${CMAKE_CURRENT_SOURCE_DIR}/get_dompdf.cmake"
@@ -111,6 +112,7 @@ add_custom_command(
       -D EXE_HASH_WINDOWS=e6aa206ad2e2d8799a713719af743687d30500077bdec27bd0dffd7f900eb528
       -D EXTERN_DIR=${CMAKE_CURRENT_SOURCE_DIR}/external
       -D OUTPUT=${PHP_EXE_PATH}
+      -D CMAKE_TLS_VERIFY=${CMAKE_TLS_VERIFY}
       -P "${CMAKE_CURRENT_SOURCE_DIR}/get_phpcli.cmake"
   DEPENDS
     "${CMAKE_CURRENT_SOURCE_DIR}/get_phpcli.cmake"
