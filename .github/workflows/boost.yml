@@ -8,26 +8,45 @@ on:
   workflow_dispatch:
 
 env:
-  BOOST_MA_V: 1
-  BOOST_MI_V: 89
-  BOOST_PA_V: 0
-  BOOST_VER: 1.89.0
+  BOOST_VER: 1.86.0
 
-
-# A workflow run is made up of one or more jobs that can run sequentially or in parallel
 jobs:
-  build-boost:
+
+  build-windows:
     runs-on: windows-latest
     steps:
-    - name: Build Boost 
-      run: |
-        cd C:
-        iwr -outf boost-${{env.BOOST_VER}}.zip https://archives.boost.io/release/1.89.0/source/boost_1_89_0.zip
-        unzip boost-${{env.BOOST_VER}}.zip
-        cd boost_1_89_0
-        bootstrap.bat
-        b2 --help
-        
-          
+      - uses: kenchan0130/actions-system-info@master
+        id: system-info
 
+      - name: Install MinGW
+        run: |
+         rm -r -Force C:\mingw64
+         cd C:\
+         iwr -outf mingw.zip https://github.com/brechtsanders/winlibs_mingw/releases/download/15.2.0posix-13.0.0-msvcrt-r1/winlibs-x86_64-posix-seh-gcc-15.2.0-mingw-w64msvcrt-13.0.0-r1.zip
+         unzip -o mingw.zip
+
+      - name: Restore Boost from Cache
+        id: restore-cache-Boost
+        uses: actions/cache/restore@v4
+        with:
+          path: C:\boost-${{env.BOOST_VER}}
+          key: ${{ runner.os }}-${{ steps.system-info.outputs.name }}-${{ steps.system-info.outputs.release }}-Boost-${{ env.BOOST_VER }}
+
+      - name: Build Boost
+        if: steps.restore-cache-Boost.outputs.cache-hit != 'true'
+        run: |
+          cd C:
+          iwr -outf boost-${{env.BOOST_VER}}.zip https://github.com/boostorg/boost/releases/download/boost-${{env.BOOST_VER}}/boost-${{env.BOOST_VER}}-cmake.zip
+          unzip boost-${{env.BOOST_VER}}.zip
+          cd boost-${{env.BOOST_VER}}
+          cmake -G "MinGW Makefiles" -S . -B build -DCMAKE_BUILD_TYPE=Release -DBOOST_RUNTIME_LINK=static -DBUILD_SHARED_LIBS=OFF -DBOOST_INCLUDE_LIBRARIES="program_options;nowide;process;predef;tokenizer"
+          cmake --build build
+
+      - name: Save Boost to Cache
+        if: steps.restore-cache-Boost.outputs.cache-hit != 'true'
+        id: save-cache-Boost
+        uses: actions/cache/save@v4
+        with:
+          path: C:\boost-${{env.BOOST_VER}}
+          key: ${{ runner.os }}-${{ steps.system-info.outputs.name }}-${{ steps.system-info.outputs.release }}-Boost-${{ env.BOOST_VER }}
 
