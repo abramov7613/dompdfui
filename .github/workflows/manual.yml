@@ -8,7 +8,7 @@ on:
   workflow_dispatch:
 
 env:
-  BOOST_VER: 1.86.0
+  BOOST_VER: 1.89.0
 
 # A workflow run is made up of one or more jobs that can run sequentially or in parallel
 jobs:
@@ -82,11 +82,42 @@ jobs:
       - uses: kenchan0130/actions-system-info@master
         id: system-info
 
-      - name: Install CMake
+      - name: Install MinGW
+        run: |
+         rm -r -Force C:\mingw64
+         cd C:\
+         iwr -outf mingw.zip https://github.com/brechtsanders/winlibs_mingw/releases/download/15.2.0posix-13.0.0-msvcrt-r1/winlibs-x86_64-posix-seh-gcc-15.2.0-mingw-w64msvcrt-13.0.0-r1.zip
+         unzip -o mingw.zip
+
+      - name: Restore Boost from Cache
+        id: restore-cache-Boost
+        uses: actions/cache/restore@v4
+        with:
+          path: C:\boost-${{env.BOOST_VER}}
+          key: ${{ runner.os }}-${{ steps.system-info.outputs.name }}-${{ steps.system-info.outputs.release }}-Boost-${{ env.BOOST_VER }}
+
+      - name: Build Boost
+        if: steps.restore-cache-Boost.outputs.cache-hit != 'true'
         run: |
           cd C:
-          iwr -outf cmake-4.1.0-windows-x86_64.msi https://github.com/Kitware/CMake/releases/download/v4.1.0/cmake-4.1.0-windows-x86_64.msi
-          C:\cmake-4.1.0-windows-x86_64.msi /quiet
+          iwr -outf boost-${{env.BOOST_VER}}.zip https://github.com/boostorg/boost/releases/download/boost-${{env.BOOST_VER}}/boost-${{env.BOOST_VER}}-cmake.zip
+          unzip boost-${{env.BOOST_VER}}.zip
+          cd boost-${{env.BOOST_VER}}
+          cmake -G "MinGW Makefiles" -S . -B build -DCMAKE_BUILD_TYPE=Release -DBOOST_RUNTIME_LINK=static -DBUILD_SHARED_LIBS=OFF
+          cmake --build build
+
+      - name: Save Boost to Cache
+        if: steps.restore-cache-Boost.outputs.cache-hit != 'true'
+        id: save-cache-Boost
+        uses: actions/cache/save@v4
+        with:
+          path: C:\boost-${{env.BOOST_VER}}
+          key: ${{ runner.os }}-${{ steps.system-info.outputs.name }}-${{ steps.system-info.outputs.release }}-Boost-${{ env.BOOST_VER }}
+
+      - name: Install Boost
+        run: |
+          cd C:\boost-${{env.BOOST_VER}}
+          cmake --build build --target install
 
       - uses: actions/checkout@v4
         with:
@@ -95,7 +126,7 @@ jobs:
       - name: Build project
         id: build-project
         run: |
-          cmake -G "MinGW Makefiles" -S . -B build -DCMAKE_BUILD_TYPE=Release 
+          cmake -G "MinGW Makefiles" -S . -B build -DCMAKE_BUILD_TYPE=Release -DBoost_DIR=C:/Boost/lib/cmake/Boost-1.89.0
           cmake --build build 
 
       - name: Upload Windows Artifact
