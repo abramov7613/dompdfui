@@ -8,7 +8,10 @@ on:
   workflow_dispatch:
 
 env:
-  BOOST_VER: 1.89.0
+  BOOST_MA_V: 1
+  BOOST_MI_V: 89
+  BOOST_PA_V: 0
+  BOOST_VER: ${{BOOST_MA_V}}.${{BOOST_MI_V}.${{BOOST_PA_V}
 
 
 # A workflow run is made up of one or more jobs that can run sequentially or in parallel
@@ -20,9 +23,9 @@ jobs:
     - name: Build Boost 
       run: |
           cd C:
-          iwr -outf boost-${{env.BOOST_VER}}.zip https://github.com/boostorg/boost/archive/refs/tags/boost-${{env.BOOST_VER}}.zip
+          iwr -outf boost-${{env.BOOST_VER}}.zip https://archives.boost.io/release/${{BOOST_MA_V}}.${{BOOST_MI_V}.${{BOOST_PA_V}/source/boost_${{BOOST_MA_V}}_${{BOOST_MI_V}_${{BOOST_PA_V}.zip
           unzip boost-${{env.BOOST_VER}}.zip
-          cd boost-${{env.BOOST_VER}}
+          cd boost_${{BOOST_MA_V}}_${{BOOST_MI_V}_${{BOOST_PA_V}
           mkdir build
           bootstrap
           b2 --help
