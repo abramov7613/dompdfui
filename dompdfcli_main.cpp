@@ -253,8 +253,8 @@ void html2pdf(const po::variables_map& opts)
   );*/
   bp::child proc(
        bp::exe="php.exe",
-       bp::args={"-c", ".", script_path.filename().string()}
-       bp::start_dir=temp_path().string()
+       bp::args={"-c", ".", script_path.filename().string()},
+       bp::start_dir=temp_path().string(),
        bp::std_out > stdout,
        bp::std_err > stdout,
        bp::std_in < bp::null
@@ -328,8 +328,8 @@ void extract_embedded_resources(const po::variables_map& opts)
       */
       bp::child proc(
         bp::exe="php.exe",
-        bp::args={"unzip.php"}
-        bp::start_dir=temp_path().string()
+        bp::args={"unzip.php"},
+        bp::start_dir=temp_path().string(),
         bp::std_out > stdout,
         bp::std_err > stdout,
         bp::std_in < bp::null
