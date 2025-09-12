@@ -1,25 +1,21 @@
-//#include <boost/asio.hpp>
-#include <boost/nowide/args.hpp>
-#include <boost/nowide/fstream.hpp>
-#include <boost/nowide/iostream.hpp>
-#include <boost/program_options.hpp>
-#include <boost/tokenizer.hpp>
-#include <boost/process.hpp>
-#include <boost/predef.h>
-#include <boost/version.hpp>
 #include <string>
 #include <vector>
 #include <filesystem>
 #include <stdexcept>
 #include <algorithm>
+#include <boost/nowide/args.hpp>
+#include <boost/nowide/fstream.hpp>
+#include <boost/nowide/iostream.hpp>
+#include <boost/program_options.hpp>
+#include <boost/tokenizer.hpp>
+#include <boost/predef.h>
+#include <boost/version.hpp>
 #include "embed_resources.h"
 #include "timestamp.h"
 
 namespace po = boost::program_options;
 namespace fs = std::filesystem ;
 namespace nw = boost::nowide;
-namespace bp = boost::process::v1;
-//namespace asio = boost::asio;
 
 int parse_cli_args(int argc, char** argv, po::variables_map& opts) ;
 void html2pdf(const po::variables_map& opts) ;
@@ -29,14 +25,14 @@ fs::path temp_path() ;
 int main(int argc, char** argv)
 {
   try {
+    if(!nw::system(nullptr))
+      throw std::runtime_error("the command processor not exists");
     nw::args utf8_args (argc, argv);
     po::variables_map opts;
     auto parse_cli_args_result = parse_cli_args(argc, argv, opts) ;
     if( parse_cli_args_result!=1 ) return parse_cli_args_result ;
     extract_embedded_resources(opts);
     html2pdf(opts);
-    //...
-
     if(!opts["no-clean"].as<bool>()) fs::remove_all(temp_path());
   }
   catch (const std::exception& e) {
@@ -242,25 +238,11 @@ void html2pdf(const po::variables_map& opts)
     "$output = $dompdf->output();\n"
     "file_put_contents(\"" << tmpto_path.filename().string() << "\", $output);\n" ;
   script.close();
-/*
-  asio::io_context ctx;
-  bp::process proc (
-       ctx.get_executor(),
-      "php.exe",
-       {"-c", ".", script_path.filename().string()},
-       bp::process_start_dir{temp_path().string()},
-       bp::process_stdio{{}, stdout, stdout}
-  );*/
-  bp::child proc(
-       bp::exe="php.exe",
-       bp::args={"-c", ".", script_path.filename().string()},
-       bp::start_dir=temp_path().string(),
-       bp::std_out > stdout,
-       bp::std_err > stdout,
-       bp::std_in < bp::null
-  );
-  proc.wait();
-  if(proc.exit_code()) throw std::runtime_error("Can't execute script file: " + script_path.string());
+
+  std::string cmd = "cd \"" + temp_path().string() + "\" && php.exe -c . \"" + script_path.filename().string() + "\"";
+  if( nw::system(cmd.c_str()) )
+    throw std::runtime_error("Can't execute script file: " + script_path.string());
+
   if(!fs::copy_file(tmpto_path, to_path, fs::copy_options::overwrite_existing))
     throw std::runtime_error("Can't write to file: " + to_path.string());
 }
@@ -320,22 +302,9 @@ void extract_embedded_resources(const po::variables_map& opts)
         "   exit(-1);\n"
         "}\n" ;
       unzipscript.close();
-    /*
-      asio::io_context ctx;
-      bp::process_start_dir dir (temp_path().string()) ;
-      bp::process proc(ctx.get_executor(), "php.exe", {"unzip.php"}, dir);
-      if(proc.wait()) throw std::runtime_error("Can't unzip 'dompdf.zip' file");
-      */
-      bp::child proc(
-        bp::exe="php.exe",
-        bp::args={"unzip.php"},
-        bp::start_dir=temp_path().string(),
-        bp::std_out > stdout,
-        bp::std_err > stdout,
-        bp::std_in < bp::null
-      );
-      proc.wait();
-      if(proc.exit_code()) throw std::runtime_error("Can't unzip 'dompdf.zip' file");
+      std::string cmd = "cd \"" + temp_path().string() + "\" && php.exe unzip.php";
+      if( nw::system(cmd.c_str()) )
+        throw std::runtime_error("Can't unzip 'dompdf.zip' file");
     }
   }
 }

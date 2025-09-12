@@ -1,21 +1,5 @@
 cmake_minimum_required(VERSION 3.31)
 
-# Only this generators supported for this project
-set(PROJECT_SUPPORTED_GENERATORS_LIST
-    "Unix Makefiles"
-    "MinGW Makefiles"
-)
-if(NOT CMAKE_GENERATOR IN_LIST PROJECT_SUPPORTED_GENERATORS_LIST)
-  message(FATAL_ERROR "Unsupported generator. Use: ${PROJECT_SUPPORTED_GENERATORS_LIST}")
-endif()
-
-
-# Check Crosscompiling
-if(CMAKE_CROSSCOMPILING)
-  message(FATAL_ERROR "Crosscompiling not supported by this project")
-endif()
-
-
 # Find Git commit details to get project version from latest commit tag,
 # becouse this project uses Git tag system for version control.
 find_package(Git REQUIRED)
@@ -41,6 +25,18 @@ set(DOMPDF_VERSION "3.1.0")
 set(PHPCLI_VERSION "8.4.11")
 
 
+# Check compiler ID
+if(NOT CMAKE_CXX_COMPILER_ID STREQUAL "GNU")
+  message(FATAL_ERROR "Only GNU Compiler Collection supported by this project")
+endif()
+
+
+# Check Crosscompiling
+if(CMAKE_CROSSCOMPILING)
+  message(FATAL_ERROR "Crosscompiling not supported by this project")
+endif()
+
+
 # Downloading CPM.cmake
 file(
   DOWNLOAD "https://github.com/cpm-cmake/CPM.cmake/releases/download/v0.42.0/CPM.cmake"
@@ -56,7 +52,21 @@ set(Boost_USE_STATIC_LIBS        ON)  # only find static libs
 set(Boost_USE_DEBUG_LIBS        OFF)  # ignore debug libs and
 set(Boost_USE_RELEASE_LIBS       ON)  # only find release libs
 set(Boost_USE_STATIC_RUNTIME     ON)
-find_package(Boost 1.86.0 REQUIRED COMPONENTS program_options nowide process predef tokenizer)
+find_package(Boost 1.86.0 REQUIRED COMPONENTS program_options nowide tokenizer predef)
+
+
+# Find wxWidgets library
+#[[
+set(wxWidgets_USE_DEBUG OFF)
+set(wxWidgets_USE_STATIC ON)
+if(CMAKE_HOST_WIN32)
+  find_package(wxWidgets REQUIRED CONFIG)
+else()
+  find_package(wxWidgets REQUIRED)
+endif()
+if(wxWidgets_USE_FILE) # not defined in CONFIG mode
+  include(${wxWidgets_USE_FILE})
+endif()]]
 
 
 # Get timestamp library
@@ -66,21 +76,7 @@ if (NOT cmake_timestamp_ADDED)
 endif()
 
 
-#[[ Get hash-library
-CPMAddPackage(
-  NAME md5_lib
-  URL "https://github.com/stbrumme/hash-library/archive/refs/heads/master.zip"
-  URL_HASH SHA256=c21cf95abaf5077ad17080bf348609feccefbfd24cf261b74efda879a6a1cf78
-  DOWNLOAD_ONLY YES
-)
-if (NOT md5_lib_ADDED)
-  message(FATAL_ERROR "Can't get hash-library library")
-endif()
-add_library(md5_lib STATIC "${md5_lib_SOURCE_DIR}/md5.cpp")
-target_include_directories(md5_lib PUBLIC $<BUILD_INTERFACE:${md5_lib_SOURCE_DIR}>)]]
-
-
-# Define embedded resources
+# Define target for embedded resources
 add_executable(resource_generator embed_main.cpp)
 target_compile_features(resource_generator PRIVATE cxx_std_20)
 target_include_directories(resource_generator PRIVATE ${Boost_INCLUDE_DIRS})
@@ -133,23 +129,34 @@ target_include_directories(embedded_resources PUBLIC $<BUILD_INTERFACE:${CMAKE_C
 target_compile_features(embedded_resources PRIVATE cxx_std_20)
 
 
-# Define CLI Executable target
+# Define target for CLI version
 add_executable(dompdfcli dompdfcli_main.cpp)
 target_compile_features(dompdfcli PRIVATE cxx_std_20)
 target_compile_definitions(dompdfcli PRIVATE
     DOMPDF_VERSION="${DOMPDF_VERSION}"
     PHPCLI_VERSION="${PHPCLI_VERSION}"
 )
-target_include_directories(dompdfcli PRIVATE ${Boost_INCLUDE_DIRS})
 target_link_libraries(dompdfcli PRIVATE
-    ${Boost_LIBRARIES}
+    Boost::program_options
+    Boost::nowide
+    Boost::predef
+    Boost::tokenizer
     embedded_resources
     cmake_timestamp
-    $<$<PLATFORM_ID:Windows>:ws2_32>
     -static
 )
 
-
-# Define GUI Executable target
-# ...
-
+# Define target for GUI version
+#[[add_executable(dompdfgui dompdfgui_main.cpp)
+target_compile_features(dompdfgui PRIVATE cxx_std_20)
+target_compile_definitions(dompdfgui PRIVATE
+    DOMPDF_VERSION="${DOMPDF_VERSION}"
+    PHPCLI_VERSION="${PHPCLI_VERSION}"
+)
+target_link_libraries(dompdfgui PRIVATE
+    ${wxWidgets_LIBRARIES}
+    Boost::tokenizer
+    embedded_resources
+    cmake_timestamp
+)
+]]

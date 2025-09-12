@@ -13,8 +13,8 @@ namespace po = boost::program_options;
 namespace nw = boost::nowide;
 
 std::string_view symbols { "0123456789_"
-                           "qwertyuiopasdfghjklzxcvbnm"
-                           "QWERTYUIOPASDFGHJKLZXCVBNM" };
+                          "qwertyuiopasdfghjklzxcvbnm"
+                          "QWERTYUIOPASDFGHJKLZXCVBNM" };
 
 int main(int argc, char** argv)
 {
