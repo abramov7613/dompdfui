@@ -244,7 +244,7 @@ void html2pdf(const po::variables_map& opts)
   std::string cmd = temp_path().root_name().string() + " && cd \"" + temp_path().string()
                     + "\" && php.exe -c . \"" + script_path.filename().string() + "\"";
 #else
-  std::string cmd = "cd \"" + temp_path().string() + "\" && php.exe -c . \""
+  std::string cmd = "cd \"" + temp_path().string() + "\" && ./php.exe -c . \""
                     + script_path.filename().string() + "\"";
 #endif
   if( nw::system(cmd.c_str()) )
@@ -313,7 +313,7 @@ void extract_embedded_resources(const po::variables_map& opts)
       std::string cmd = temp_path().root_name().string() + " && cd \""
                         + temp_path().string() + "\" && php.exe unzip.php";
 #else
-      std::string cmd = "cd \"" + temp_path().string() + "\" && php.exe unzip.php";
+      std::string cmd = "cd \"" + temp_path().string() + "\" && ./php.exe unzip.php";
 #endif
       if( nw::system(cmd.c_str()) )
         throw std::runtime_error("Can't unzip 'dompdf.zip' file");
