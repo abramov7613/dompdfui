@@ -22,7 +22,7 @@ jobs:
       - name: Install Dependencies
         run: |
           sudo apt-get update
-          sudo apt-get install -y cmake build-essential gettext git pkg-config 
+          sudo apt-get install -y cmake build-essential gettext git pkg-config
 
       - uses: kenchan0130/actions-system-info@master
         id: system-info
@@ -41,7 +41,7 @@ jobs:
           wget https://github.com/boostorg/boost/releases/download/boost-${{env.BOOST_VER}}/boost-${{env.BOOST_VER}}-cmake.tar.xz
           tar -xJf boost-${{env.BOOST_VER}}-cmake.tar.xz
           cd boost-${{env.BOOST_VER}}
-          cmake -S . -B build -DCMAKE_BUILD_TYPE=Release -DBOOST_RUNTIME_LINK=static -DBUILD_SHARED_LIBS=OFF
+          cmake -S . -B build -DCMAKE_BUILD_TYPE=Release -DBOOST_RUNTIME_LINK=static -DBUILD_SHARED_LIBS=OFF -DBOOST_INCLUDE_LIBRARIES="program_options;nowide;predef;tokenizer"
           cmake --build build
 
       - name: Save Boost to Cache
@@ -56,7 +56,7 @@ jobs:
         run: |
           cd ~/boost-${{env.BOOST_VER}}
           sudo cmake --build build --target install
-          
+
       - uses: actions/checkout@v4
         with:
           fetch-depth: 0
@@ -65,8 +65,8 @@ jobs:
         id: build-project
         run: |
           cd $GITHUB_WORKSPACE
-          cmake -S . -B build -DCMAKE_BUILD_TYPE=Release 
-          cmake --build build 
+          cmake -S . -B build -DCMAKE_BUILD_TYPE=Release
+          cmake --build build
 
       - name: Upload artifact
         uses: actions/upload-artifact@v4.6.2
@@ -103,7 +103,7 @@ jobs:
           iwr -outf boost-${{env.BOOST_VER}}.zip https://github.com/boostorg/boost/releases/download/boost-${{env.BOOST_VER}}/boost-${{env.BOOST_VER}}-cmake.zip
           unzip boost-${{env.BOOST_VER}}.zip
           cd boost-${{env.BOOST_VER}}
-          cmake -G "MinGW Makefiles" -S . -B build -DCMAKE_BUILD_TYPE=Release -DBOOST_RUNTIME_LINK=static -DBUILD_SHARED_LIBS=OFF -DBOOST_INCLUDE_LIBRARIES="program_options;nowide;process;predef;tokenizer"
+          cmake -G "MinGW Makefiles" -S . -B build -DCMAKE_BUILD_TYPE=Release -DBOOST_RUNTIME_LINK=static -DBUILD_SHARED_LIBS=OFF -DBOOST_INCLUDE_LIBRARIES="program_options;nowide;predef;tokenizer"
           cmake --build build
 
       - name: Save Boost to Cache
@@ -127,7 +127,7 @@ jobs:
         id: build-project
         run: |
           cmake -G "MinGW Makefiles" -S . -B build -DCMAKE_BUILD_TYPE=Release -DBoost_DIR="C:/Boost/lib/cmake/Boost-${{ env.BOOST_VER }}" -DCMAKE_TLS_VERIFY=OFF
-          cmake --build build 
+          cmake --build build
 
       - name: Upload Windows Artifact
         uses: actions/upload-artifact@v4
