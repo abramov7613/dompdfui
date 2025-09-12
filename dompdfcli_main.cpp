@@ -4,6 +4,7 @@
 #include <stdexcept>
 #include <algorithm>
 #include <boost/nowide/args.hpp>
+#include <boost/nowide/cstdlib.hpp>
 #include <boost/nowide/fstream.hpp>
 #include <boost/nowide/iostream.hpp>
 #include <boost/program_options.hpp>
