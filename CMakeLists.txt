@@ -22,7 +22,7 @@ endif()
 project(dompdfui VERSION ${DOMPDFUI_VERSION})
 set(BUILD_SHARED_LIBS OFF)
 set(DOMPDF_VERSION "3.1.0")
-set(PHPCLI_VERSION "8.4.11")
+set(PHPCLI_VERSION "8.0.30")
 
 
 # Check compiler ID
@@ -100,12 +100,12 @@ add_custom_command(
   OUTPUT ${PHP_EXE_PATH}
   COMMAND
     ${CMAKE_COMMAND}
-      -D URL_LINUX=https://dl.static-php.dev/static-php-cli/bulk/php-8.4.11-cli-linux-x86_64.tar.gz
-      -D URL_WINDOWS=https://dl.static-php.dev/static-php-cli/windows/spc-max/php-8.4.11-cli-win.zip
-      -D HASH_LINUX=a4f4bc398479514e3d8d942182dd37f98d0cd695596dad656d5d823438e0258f
-      -D HASH_WINDOWS=46d160c2a436e55099a43215c20805be52249b05df81985dd2e34317b220d19e
-      -D EXE_HASH_LINUX=c382357682e1ad6c5aa703e955d7f38d3c81a3581373895aaf27450910dd2274
-      -D EXE_HASH_WINDOWS=e6aa206ad2e2d8799a713719af743687d30500077bdec27bd0dffd7f900eb528
+      -D URL_LINUX=https://dl.static-php.dev/static-php-cli/bulk/php-8.0.30-cli-linux-x86_64.tar.gz
+      -D URL_WINDOWS=https://dl.static-php.dev/static-php-cli/windows/spc-max/php-8.0.30-cli-win.zip
+      -D HASH_LINUX=805fadfc7eaa97541344d53a5ef2912d7be1e6bdeab753fddc2ce0c63b40c1a5
+      -D HASH_WINDOWS=67c98a95790d2dd9f79b051c2b6cab0cf9bb4d4cc0b4c5401c991bc99c99ac82
+      -D EXE_HASH_LINUX=8f2dab4ac208d366a2489a2c90008ae857c616f96607e24ba513b405c5e6e2c2
+      -D EXE_HASH_WINDOWS=03d692f3ce76a36641d7395c44ad40af62f3a2ce4d16fb4a61314a4120a8914f
       -D EXTERN_DIR=${CMAKE_CURRENT_SOURCE_DIR}/external
       -D OUTPUT=${PHP_EXE_PATH}
       -D CMAKE_TLS_VERIFY=${CMAKE_TLS_VERIFY}
