@@ -21,8 +21,16 @@ endif()
 # Setup project options
 project(dompdfui VERSION ${DOMPDFUI_VERSION})
 set(BUILD_SHARED_LIBS OFF)
-set(DOMPDF_VERSION "3.1.0")
-set(PHPCLI_VERSION "8.0.30")
+set(DOMPDF_VERSION "3.1.0" CACHE STRING "")
+set(DOMPDF_RELEASE_URL "https://github.com/dompdf/dompdf/releases/download/v3.1.0/dompdf-3.1.0.zip" CACHE STRING "")
+set(DOMPDF_RELEASE_HASH "cafb29ad27308660e1650ff54c9c4ffc67a289afb89a59d754d6649c58bd7ad1" CACHE STRING "")
+set(PHPCLI_VERSION "8.0.30" CACHE STRING "")
+set(PHPCLI_RELEASE_LINUX_URL "https://dl.static-php.dev/static-php-cli/bulk/php-8.0.30-cli-linux-x86_64.tar.gz" CACHE STRING "")
+set(PHPCLI_RELEASE_LINUX_AR_HASH "805fadfc7eaa97541344d53a5ef2912d7be1e6bdeab753fddc2ce0c63b40c1a5" CACHE STRING "")
+set(PHPCLI_RELEASE_LINUX_EXE_HASH "8f2dab4ac208d366a2489a2c90008ae857c616f96607e24ba513b405c5e6e2c2" CACHE STRING "")
+set(PHPCLI_RELEASE_WINDOWS_URL "https://dl.static-php.dev/static-php-cli/windows/spc-max/php-8.0.30-cli-win.zip" CACHE STRING "")
+set(PHPCLI_RELEASE_WINDOWS_AR_HASH "67c98a95790d2dd9f79b051c2b6cab0cf9bb4d4cc0b4c5401c991bc99c99ac82" CACHE STRING "")
+set(PHPCLI_RELEASE_WINDOWS_EXE_HASH "03d692f3ce76a36641d7395c44ad40af62f3a2ce4d16fb4a61314a4120a8914f" CACHE STRING "")
 
 
 # Check compiler ID
@@ -55,20 +63,6 @@ set(Boost_USE_STATIC_RUNTIME     ON)
 find_package(Boost 1.86.0 REQUIRED COMPONENTS program_options nowide tokenizer predef)
 
 
-# Find wxWidgets library
-#[[
-set(wxWidgets_USE_DEBUG OFF)
-set(wxWidgets_USE_STATIC ON)
-if(CMAKE_HOST_WIN32)
-  find_package(wxWidgets REQUIRED CONFIG)
-else()
-  find_package(wxWidgets REQUIRED)
-endif()
-if(wxWidgets_USE_FILE) # not defined in CONFIG mode
-  include(${wxWidgets_USE_FILE})
-endif()]]
-
-
 # Get timestamp library
 CPMAddPackage("gh:abramov7613/cmake_timestamp@1.0.3")
 if (NOT cmake_timestamp_ADDED)
@@ -87,8 +81,8 @@ add_custom_command(
   OUTPUT ${DOMPDF_ZIP_PATH}
   COMMAND
     ${CMAKE_COMMAND}
-      -D URL=https://github.com/dompdf/dompdf/releases/download/v3.1.0/dompdf-3.1.0.zip
-      -D HASH=cafb29ad27308660e1650ff54c9c4ffc67a289afb89a59d754d6649c58bd7ad1
+      -D URL=${DOMPDF_RELEASE_URL}
+      -D HASH=${DOMPDF_RELEASE_HASH}
       -D OUTPUT=${DOMPDF_ZIP_PATH}
       -D CMAKE_TLS_VERIFY=${CMAKE_TLS_VERIFY}
       -P "${CMAKE_CURRENT_SOURCE_DIR}/get_dompdf.cmake"
@@ -100,12 +94,12 @@ add_custom_command(
   OUTPUT ${PHP_EXE_PATH}
   COMMAND
     ${CMAKE_COMMAND}
-      -D URL_LINUX=https://dl.static-php.dev/static-php-cli/bulk/php-8.0.30-cli-linux-x86_64.tar.gz
-      -D URL_WINDOWS=https://dl.static-php.dev/static-php-cli/windows/spc-max/php-8.0.30-cli-win.zip
-      -D HASH_LINUX=805fadfc7eaa97541344d53a5ef2912d7be1e6bdeab753fddc2ce0c63b40c1a5
-      -D HASH_WINDOWS=67c98a95790d2dd9f79b051c2b6cab0cf9bb4d4cc0b4c5401c991bc99c99ac82
-      -D EXE_HASH_LINUX=8f2dab4ac208d366a2489a2c90008ae857c616f96607e24ba513b405c5e6e2c2
-      -D EXE_HASH_WINDOWS=03d692f3ce76a36641d7395c44ad40af62f3a2ce4d16fb4a61314a4120a8914f
+      -D URL_LINUX=${PHPCLI_RELEASE_LINUX_URL}
+      -D URL_WINDOWS=${PHPCLI_RELEASE_WINDOWS_URL}
+      -D HASH_LINUX=${PHPCLI_RELEASE_LINUX_AR_HASH}
+      -D HASH_WINDOWS=${PHPCLI_RELEASE_WINDOWS_AR_HASH}
+      -D EXE_HASH_LINUX=${PHPCLI_RELEASE_LINUX_EXE_HASH}
+      -D EXE_HASH_WINDOWS=${PHPCLI_RELEASE_WINDOWS_EXE_HASH}
       -D EXTERN_DIR=${CMAKE_CURRENT_SOURCE_DIR}/external
       -D OUTPUT=${PHP_EXE_PATH}
       -D CMAKE_TLS_VERIFY=${CMAKE_TLS_VERIFY}
@@ -129,14 +123,14 @@ target_include_directories(embedded_resources PUBLIC $<BUILD_INTERFACE:${CMAKE_C
 target_compile_features(embedded_resources PRIVATE cxx_std_20)
 
 
-# Define target for CLI version
-add_executable(dompdfcli dompdfcli_main.cpp)
-target_compile_features(dompdfcli PRIVATE cxx_std_20)
-target_compile_definitions(dompdfcli PRIVATE
+# Define target for project executable
+add_executable(${PROJECT_NAME} dompdfcli_main.cpp)
+target_compile_features(${PROJECT_NAME} PRIVATE cxx_std_20)
+target_compile_definitions(${PROJECT_NAME} PRIVATE
     DOMPDF_VERSION="${DOMPDF_VERSION}"
     PHPCLI_VERSION="${PHPCLI_VERSION}"
 )
-target_link_libraries(dompdfcli PRIVATE
+target_link_libraries(${PROJECT_NAME} PRIVATE
     Boost::program_options
     Boost::nowide
     Boost::predef
@@ -145,18 +139,3 @@ target_link_libraries(dompdfcli PRIVATE
     cmake_timestamp
     -static
 )
-
-# Define target for GUI version
-#[[add_executable(dompdfgui dompdfgui_main.cpp)
-target_compile_features(dompdfgui PRIVATE cxx_std_20)
-target_compile_definitions(dompdfgui PRIVATE
-    DOMPDF_VERSION="${DOMPDF_VERSION}"
-    PHPCLI_VERSION="${PHPCLI_VERSION}"
-)
-target_link_libraries(dompdfgui PRIVATE
-    ${wxWidgets_LIBRARIES}
-    Boost::tokenizer
-    embedded_resources
-    cmake_timestamp
-)
-]]

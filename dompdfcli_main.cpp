@@ -20,14 +20,16 @@ namespace fs = std::filesystem ;
 namespace nw = boost::nowide;
 
 
-// prototypes
 std::tuple<int, std::vector<fs::path>, std::vector<fs::path>, po::variables_map> parse_cli_args(int argc, char** argv) ;
 void extract_embedded_resources(const po::variables_map&) ;
 void html2pdf(const std::vector<fs::path>&, const std::vector<fs::path>&, const po::variables_map&) ;
 fs::path temp_path() ;
 
 
-// entry point
+bool cleanup_on_exit {};
+int return_code {};
+
+
 int main(int argc, char** argv)
 {
   try {
@@ -35,20 +37,23 @@ int main(int argc, char** argv)
       throw std::runtime_error("the command processor is not exists");
     nw::args utf8_args (argc, argv);
     auto [parse_result, in_files, out_files, opts] = parse_cli_args(argc, argv) ;
-    if( parse_result!=1 ) return parse_result ;
-    extract_embedded_resources(opts);
-    html2pdf(in_files, out_files, opts);
-    if(!opts["no-clean"].as<bool>()) fs::remove_all(temp_path());
+    if( parse_result!=1 ) {
+      return_code = parse_result ;
+    } else {
+      extract_embedded_resources(opts);
+      html2pdf(in_files, out_files, opts);
+    }
   }
   catch (const std::exception& e) {
     nw::cout << "Error: " << e.what() << '\n';
-    return -1;
+    return_code = -1;
   }
   catch (...) {
     nw::cout << "Error: Unknown exception\n" ;
-    return -1;
+    return_code = -1;
   }
-  return 0;
+  if (cleanup_on_exit) fs::remove_all(temp_path());
+  return return_code;
 }
 
 
@@ -170,6 +175,8 @@ std::tuple<int, std::vector<fs::path>, std::vector<fs::path>, po::variables_map>
       });
       if( already_exists ) return {-1, {}, {}, {}};
     }
+
+    cleanup_on_exit = !vm["no-clean"].as<bool>() ;
   }
   catch(const po::error& e) {
     nw::cout << "Error: " << e.what() << "\nTry:\t" << argv[0] << " --help\n";
