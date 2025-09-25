@@ -1,8 +1,10 @@
 # About DompdfUI
 
-This is a portable application that implements a command line interface for the Dompdf library on Windows and Linux operating systems. There are no external dependencies since static linking is used, and the PHP interpreter and the Dompdf library itself are embedded inside the executable file. All you need to use it is to download and run it in the terminal. Dompdfui is not a full featured html to pdf converter, but is only intended for testing the Dompdf library in different environments.
+This is a portable application that implements a command line interface for the Dompdf library on Windows and Linux operating systems. There are no external dependencies since static linking is used, and the PHP interpreter and the Dompdf library itself are embedded inside the executable file. All you need to use it is to download and run it in the terminal. Dompdfui is not a full-featured HTML to PDF converter; it is only a wrapper around the Dompdf library and is intended for testing in various environments.
 
 ## Usage
+
+You can build from source or download release from https://github.com/abramov7613/dompdfui/releases
 
 ```
 dompdfui [OPTIONS] INPUT-FILE1 [INPUT-FILE2] [INPUT-FILE3] [...] OUTPUT-DIR
@@ -39,7 +41,7 @@ At least one input file and output directory must be specified. The output file 
 | --debugLayoutInline | true |  |
 | --debugLayoutPaddingBox | true |  |
 | --dpi | 96 | Image DPI setting. This setting determines the default DPI setting for images and fonts. The DPI may be overridden for inline images by explicitly setting the image's width & height style attributes (i.e. if the image's native width is 600 pixels and you specify the image's width as 72 points, the image will have a DPI of 600 in the rendered PDF. The DPI of background images can not be overridden and is controlled entirely via this parameter. For the purposes of DOMPDF, pixels per inch (PPI) = dots per inch (DPI). If a size in html is given as px (or without unit as image size), this tells the corresponding size in pt at 72 DPI. This adjusts the relative sizes to be similar to the rendering of the html page in a reference browser. In pdf, always 1 pt = 1/72 inch. |
-| --fontHeightRatio | 1.1 | A ratio applied to the fonts height to be more like browsers' line height. |
+| --fontHeightRatio | 1.1 | A ratio applied to the fonts height to be more like browsers line height. |
 | --rootDir || The root of your DOMPDF installation. |
 | --tempDir || The location of a temporary directory. The directory specified must be writable by the executing process. The temporary directory is required to download remote images and when using the PFDLib back end. |
 | --fontDir || The location of the DOMPDF font directory. The location of the directory where DOMPDF will store fonts and font metrics. Note: This directory must exist and be writable by the executing process. |
@@ -55,3 +57,31 @@ At least one input file and output directory must be specified. The output file 
 | --allowedRemoteHosts || It is Array of strings and can be specify multiple times. List of allowed remote hosts. Each value of the array must be a valid hostname. This will be used to filter which resources can be loaded in combination with isRemoteEnabled. If isRemoteEnabled is FALSE, then this will have no effect. Allow any remote host if not specified. |
 
 Additional documentation is available on the dompdf wiki at: https://github.com/dompdf/dompdf/wiki
+
+## Build
+
+Regardless of your system, you need to install:
+ - GCC 12.2 or higher (MinGW on Windows)
+ - CMake 3.31 or higher
+ - Boost 1.86 or higher
+ - Git 2.40 or higher
+You will also need access to https://github.com and https://static-php.dev during the CMake configuration stage.
+
+### Linux
+
+```
+git clone https://github.com/abramov7613/dompdfui.git
+cd dompdfui
+cmake -S . -B build -DCMAKE_BUILD_TYPE=Release
+cmake --build build
+```
+
+### Windows
+
+```
+git clone https://github.com/abramov7613/dompdfui.git
+cd dompdfui
+cmake -G "MinGW Makefiles" -S . -B build -DCMAKE_BUILD_TYPE=Release -DBoost_DIR="your/boost/installation/location" -DCMAKE_TLS_VERIFY=OFF
+cmake --build build
+```
+After that you will find target executable in build directory.
