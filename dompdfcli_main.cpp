@@ -284,8 +284,9 @@ void html2pdf(const std::vector<fs::path>& in_files, const std::vector<fs::path>
   for(size_t i=0; i<in_files.size(); ++i){
     std::string ifile = in_files[i].string();
     std::string ofile = out_files[i].string();
-    std::string cmd = "php.exe -c . \"" + script_path.filename().string() + "\" \""
-                      + ifile + "\" \"" + ofile + "\"" ;
+    std::string memlimit = std::to_string( opts["php-memory-limit"].as<unsigned long long>() );
+    std::string cmd = "php.exe -d memory_limit=" + memlimit + " \"" + script_path.filename().string()
+                      + "\" \"" + ifile + "\" \"" + ofile + "\"" ;
 #if BOOST_OS_WINDOWS
     cmd = temp_path().root_name().string() + " && cd \"" + temp_path().string() + "\" && " + cmd ;
 #else
@@ -326,11 +327,6 @@ void extract_embedded_resources(const po::variables_map& opts)
   php_exe_target_path /= "php.exe" ;
   if(!fs::exists(php_exe_target_path)) {
     extract(php_rsc_p, php_rsc_sz, php_exe_target_path) ;
-    auto php_ini_path = temp_path() / "php.ini";
-    nw::ofstream phpini ( php_ini_path );
-    if(!phpini.is_open()) throw std::runtime_error("Can't open file: " + php_ini_path.string()) ;
-    phpini << "memory_limit=" << opts["php-memory-limit"].as<unsigned long long>() << '\n';
-    phpini.close();
 #if BOOST_OS_UNIX
     fs::permissions(php_exe_target_path, fs::perms::owner_all | fs::perms::group_all, fs::perm_options::add);
 #endif
