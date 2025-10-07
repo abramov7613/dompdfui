@@ -337,6 +337,8 @@ void extract_embedded_resources(const po::variables_map& opts)
     auto dompdf_dir = temp_path() / "dompdf" ;
     if(fs::exists(dompdf_dir) && !fs::is_directory(dompdf_dir)) fs::remove(dompdf_dir) ;
     if(!fs::exists(dompdf_dir)){
+      nw::cout.flush();
+#if BOOST_OS_WINDOWS
       std::string unzipscript = "$zip = new ZipArchive; "
                                 "if ($zip->open('dompdf.zip') === TRUE) { "
                                 "   $zip->extractTo('.'); "
@@ -344,11 +346,16 @@ void extract_embedded_resources(const po::variables_map& opts)
                                 "} else { "
                                 "   exit(-1); "
                                 "}" ;
-      nw::cout.flush();
-#if BOOST_OS_WINDOWS
       std::string cmd = temp_path().root_name().string() + " && cd \""
                         + temp_path().string() + "\" && php.exe -r \"" + unzipscript + "\"";
 #else
+      std::string unzipscript = "\\$zip = new ZipArchive; "
+                                "if (\\$zip->open('dompdf.zip') === TRUE) { "
+                                "   \\$zip->extractTo('.'); "
+                                "   \\$zip->close(); "
+                                "} else { "
+                                "   exit(-1); "
+                                "}" ;
       std::string cmd = "cd \"" + temp_path().string() + "\" && ./php.exe -r \"" + unzipscript + "\"";
 #endif
       if( nw::system(cmd.c_str()) )

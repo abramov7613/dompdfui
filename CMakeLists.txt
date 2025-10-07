@@ -25,12 +25,18 @@ set(DOMPDF_VERSION "3.1.0" CACHE STRING "")
 set(DOMPDF_RELEASE_URL "https://github.com/dompdf/dompdf/releases/download/v3.1.0/dompdf-3.1.0.zip" CACHE STRING "")
 set(DOMPDF_RELEASE_HASH "cafb29ad27308660e1650ff54c9c4ffc67a289afb89a59d754d6649c58bd7ad1" CACHE STRING "")
 set(PHPCLI_VERSION "8.0.30" CACHE STRING "")
-set(PHPCLI_RELEASE_LINUX_URL "https://dl.static-php.dev/static-php-cli/bulk/php-8.0.30-cli-linux-x86_64.tar.gz" CACHE STRING "")
-set(PHPCLI_RELEASE_LINUX_AR_HASH "805fadfc7eaa97541344d53a5ef2912d7be1e6bdeab753fddc2ce0c63b40c1a5" CACHE STRING "")
-set(PHPCLI_RELEASE_LINUX_EXE_HASH "8f2dab4ac208d366a2489a2c90008ae857c616f96607e24ba513b405c5e6e2c2" CACHE STRING "")
+set(PHPCLI_RELEASE_LINUX_URL "https://dl.static-php.dev/static-php-cli/common/php-8.0.30-cli-linux-x86_64.tar.gz" CACHE STRING "")
+set(PHPCLI_RELEASE_LINUX_AR_HASH "1a5b1d5e60bca9e0c06557640f878e88bd52ac4eb28e8a118103867b084e8ff8" CACHE STRING "")
+set(PHPCLI_RELEASE_LINUX_EXE_HASH "85b3876353dc47b278e68bb764fa6280deaf08b47e328f71b08c6f6f18559b14" CACHE STRING "")
 set(PHPCLI_RELEASE_WINDOWS_URL "https://dl.static-php.dev/static-php-cli/windows/spc-max/php-8.0.30-cli-win.zip" CACHE STRING "")
 set(PHPCLI_RELEASE_WINDOWS_AR_HASH "67c98a95790d2dd9f79b051c2b6cab0cf9bb4d4cc0b4c5401c991bc99c99ac82" CACHE STRING "")
 set(PHPCLI_RELEASE_WINDOWS_EXE_HASH "03d692f3ce76a36641d7395c44ad40af62f3a2ce4d16fb4a61314a4120a8914f" CACHE STRING "")
+
+
+# Check Architecture
+if(NOT CMAKE_HOST_SYSTEM_PROCESSOR STREQUAL "x86_64")
+  message(FATAL_ERROR "Only x86_64 architecture supported by this project")
+endif()
 
 
 # Check compiler ID
