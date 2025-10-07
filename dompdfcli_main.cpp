@@ -4,6 +4,10 @@
 #include <filesystem>
 #include <stdexcept>
 #include <algorithm>
+#include <sstream>
+#include <chrono>
+#include <iomanip>
+#include <ctime>
 #include <boost/nowide/args.hpp>
 #include <boost/nowide/cstdlib.hpp>
 #include <boost/nowide/fstream.hpp>
@@ -189,7 +193,14 @@ std::tuple<int, std::vector<fs::path>, std::vector<fs::path>, po::variables_map>
 // function generate php script from Options and run it
 void html2pdf(const std::vector<fs::path>& in_files, const std::vector<fs::path>& out_files, const po::variables_map& opts)
 {
-  auto script_path = temp_path() / "html2pdf.php" ;
+  auto now = std::chrono::system_clock::now();
+  auto now_c = std::chrono::system_clock::to_time_t(now);
+  auto milliseconds = std::chrono::duration_cast<std::chrono::milliseconds>(now.time_since_epoch()) % 1000;
+  std::tm *local_time = std::localtime(&now_c);
+  std::stringstream ss;
+  ss << std::put_time(local_time, "html2pdf_%d%B%Y_%HH%MM%Ss") << std::setfill('0')
+     << std::setw(3) << milliseconds.count() << "ms.php" ;
+  auto script_path = temp_path() / ss.str() ;
   nw::ofstream script( script_path ) ;
   if(!script.is_open()) throw std::runtime_error("Can't open file: " + script_path.string()) ;
   auto php_array = [](const std::vector<std::string>& v){
@@ -219,20 +230,20 @@ void html2pdf(const std::vector<fs::path>& in_files, const std::vector<fs::path>
     "use Dompdf\\Dompdf;\n"
     "use Dompdf\\Options;\n\n"
     "$options = new Options();\n"
-    "$options->setIsPhpEnabled((bool)"              << opts["isPhpEnabled"].as<bool>() << ");\n"
-    "$options->setIsRemoteEnabled((bool)"           << opts["isRemoteEnabled"].as<bool>() << ");\n"
-    "$options->setIsPdfAEnabled((bool)"             << opts["isPdfAEnabled"].as<bool>() << ");\n"
-    "$options->setIsJavascriptEnabled((bool)"       << opts["isJavascriptEnabled"].as<bool>() << ");\n"
-    "$options->setIsHtml5ParserEnabled((bool)"      << opts["isHtml5ParserEnabled"].as<bool>() << ");\n"
-    "$options->setIsFontSubsettingEnabled((bool)"   << opts["isFontSubsettingEnabled"].as<bool>() << ");\n"
-    "$options->setDebugPng((bool)"                  << opts["debugPng"].as<bool>() << ");\n"
-    "$options->setDebugKeepTemp((bool)"             << opts["debugKeepTemp"].as<bool>() << ");\n"
-    "$options->setDebugCss((bool)"                  << opts["debugCss"].as<bool>() << ");\n"
-    "$options->setDebugLayout((bool)"               << opts["debugLayout"].as<bool>() << ");\n"
-    "$options->setDebugLayoutLines((bool)"          << opts["debugLayoutLines"].as<bool>() << ");\n"
-    "$options->setDebugLayoutBlocks((bool)"         << opts["debugLayoutBlocks"].as<bool>() << ");\n"
-    "$options->setDebugLayoutInline((bool)"         << opts["debugLayoutInline"].as<bool>() << ");\n"
-    "$options->setDebugLayoutPaddingBox((bool)"     << opts["debugLayoutPaddingBox"].as<bool>() << ");\n"
+    "$options->setIsPhpEnabled("                    << opts["isPhpEnabled"].as<bool>() << ");\n"
+    "$options->setIsRemoteEnabled("                 << opts["isRemoteEnabled"].as<bool>() << ");\n"
+    "$options->setIsPdfAEnabled("                   << opts["isPdfAEnabled"].as<bool>() << ");\n"
+    "$options->setIsJavascriptEnabled("             << opts["isJavascriptEnabled"].as<bool>() << ");\n"
+    "$options->setIsHtml5ParserEnabled("            << opts["isHtml5ParserEnabled"].as<bool>() << ");\n"
+    "$options->setIsFontSubsettingEnabled("         << opts["isFontSubsettingEnabled"].as<bool>() << ");\n"
+    "$options->setDebugPng("                        << opts["debugPng"].as<bool>() << ");\n"
+    "$options->setDebugKeepTemp("                   << opts["debugKeepTemp"].as<bool>() << ");\n"
+    "$options->setDebugCss("                        << opts["debugCss"].as<bool>() << ");\n"
+    "$options->setDebugLayout("                     << opts["debugLayout"].as<bool>() << ");\n"
+    "$options->setDebugLayoutLines("                << opts["debugLayoutLines"].as<bool>() << ");\n"
+    "$options->setDebugLayoutBlocks("               << opts["debugLayoutBlocks"].as<bool>() << ");\n"
+    "$options->setDebugLayoutInline("               << opts["debugLayoutInline"].as<bool>() << ");\n"
+    "$options->setDebugLayoutPaddingBox("           << opts["debugLayoutPaddingBox"].as<bool>() << ");\n"
     "$options->setDpi("                             << opts["dpi"].as<std::string>() << ");\n"
     "$options->setFontHeightRatio("                 << opts["fontHeightRatio"].as<std::string>() << ");\n" ;
 
@@ -281,7 +292,7 @@ void html2pdf(const std::vector<fs::path>& in_files, const std::vector<fs::path>
   script.close();
   nw::cout.flush();
 
-  for(size_t i=0; i<in_files.size(); ++i){
+  for(size_t i=0; i<in_files.size(); ++i) {
     std::string ifile = in_files[i].string();
     std::string ofile = out_files[i].string();
     std::string memlimit = std::to_string( opts["php-memory-limit"].as<unsigned long long>() );
@@ -296,6 +307,8 @@ void html2pdf(const std::vector<fs::path>& in_files, const std::vector<fs::path>
       throw std::runtime_error("Can't execute '" + script_path.filename().string() + "' with files:\n\t"
                                 + ifile + "\n\t" + ofile + '\n');
   }
+
+  fs::remove(script_path);
 }
 
 
