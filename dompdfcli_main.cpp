@@ -337,25 +337,19 @@ void extract_embedded_resources(const po::variables_map& opts)
     auto dompdf_dir = temp_path() / "dompdf" ;
     if(fs::exists(dompdf_dir) && !fs::is_directory(dompdf_dir)) fs::remove(dompdf_dir) ;
     if(!fs::exists(dompdf_dir)){
-      auto path = temp_path() / "unzip.php" ;
-      nw::ofstream unzipscript( path ) ;
-      if(!unzipscript.is_open()) throw std::runtime_error("Can't open file: " + path.string()) ;
-      unzipscript <<
-        "<?php\n"
-        "$zip = new ZipArchive;\n"
-        "if ($zip->open('dompdf.zip') === TRUE) {\n"
-        "   $zip->extractTo('.');\n"
-        "   $zip->close();\n"
-        "} else {\n"
-        "   exit(-1);\n"
-        "}\n" ;
-      unzipscript.close();
+      std::string unzipscript = "$zip = new ZipArchive; "
+                                "if ($zip->open('dompdf.zip') === TRUE) { "
+                                "   $zip->extractTo('.'); "
+                                "   $zip->close(); "
+                                "} else { "
+                                "   exit(-1); "
+                                "}" ;
       nw::cout.flush();
 #if BOOST_OS_WINDOWS
       std::string cmd = temp_path().root_name().string() + " && cd \""
-                        + temp_path().string() + "\" && php.exe unzip.php";
+                        + temp_path().string() + "\" && php.exe -r \"" + unzipscript + "\"";
 #else
-      std::string cmd = "cd \"" + temp_path().string() + "\" && ./php.exe unzip.php";
+      std::string cmd = "cd \"" + temp_path().string() + "\" && ./php.exe -r \"" + unzipscript + "\"";
 #endif
       if( nw::system(cmd.c_str()) )
         throw std::runtime_error("Can't unzip 'dompdf.zip' file");
