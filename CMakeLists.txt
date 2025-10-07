@@ -1,5 +1,25 @@
 cmake_minimum_required(VERSION 3.31)
 
+# Check Architecture
+if(NOT CMAKE_HOST_SYSTEM_PROCESSOR STREQUAL "x86_64"
+     AND NOT CMAKE_HOST_SYSTEM_PROCESSOR STREQUAL "AMD64"
+       AND NOT CMAKE_HOST_SYSTEM_PROCESSOR STREQUAL "IA64")
+  message(FATAL_ERROR "Only x86_64 architecture supported by this project")
+endif()
+
+
+# Check compiler ID
+if(NOT CMAKE_CXX_COMPILER_ID STREQUAL "GNU")
+  message(FATAL_ERROR "Only GNU Compiler Collection supported by this project")
+endif()
+
+
+# Check Crosscompiling
+if(CMAKE_CROSSCOMPILING)
+  message(FATAL_ERROR "Crosscompiling not supported by this project")
+endif()
+
+
 # Find Git commit details to get project version from latest commit tag,
 # becouse this project uses Git tag system for version control.
 find_package(Git REQUIRED)
@@ -31,24 +51,6 @@ set(PHPCLI_RELEASE_LINUX_EXE_HASH "85b3876353dc47b278e68bb764fa6280deaf08b47e328
 set(PHPCLI_RELEASE_WINDOWS_URL "https://dl.static-php.dev/static-php-cli/windows/spc-max/php-8.0.30-cli-win.zip" CACHE STRING "")
 set(PHPCLI_RELEASE_WINDOWS_AR_HASH "67c98a95790d2dd9f79b051c2b6cab0cf9bb4d4cc0b4c5401c991bc99c99ac82" CACHE STRING "")
 set(PHPCLI_RELEASE_WINDOWS_EXE_HASH "03d692f3ce76a36641d7395c44ad40af62f3a2ce4d16fb4a61314a4120a8914f" CACHE STRING "")
-
-
-# Check Architecture
-if(NOT CMAKE_HOST_SYSTEM_PROCESSOR STREQUAL "x86_64")
-  message(FATAL_ERROR "Only x86_64 architecture supported by this project")
-endif()
-
-
-# Check compiler ID
-if(NOT CMAKE_CXX_COMPILER_ID STREQUAL "GNU")
-  message(FATAL_ERROR "Only GNU Compiler Collection supported by this project")
-endif()
-
-
-# Check Crosscompiling
-if(CMAKE_CROSSCOMPILING)
-  message(FATAL_ERROR "Crosscompiling not supported by this project")
-endif()
 
 
 # Downloading CPM.cmake
