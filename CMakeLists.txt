@@ -3,7 +3,7 @@ cmake_minimum_required(VERSION 3.31)
 # Check Architecture
 set(PROJECT_SUPPORTED_ARCHITECTURES "x86_64;AMD64;IA64")
 if( NOT CMAKE_HOST_SYSTEM_PROCESSOR IN_LIST PROJECT_SUPPORTED_ARCHITECTURES )
-  message(FATAL_ERROR "Only x86_64 architecture supported by this project")
+  message(FATAL_ERROR "Architecture '${CMAKE_HOST_SYSTEM_PROCESSOR}' not supported by this project")
 endif()
 
 
