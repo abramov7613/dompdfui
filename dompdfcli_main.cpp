@@ -295,6 +295,7 @@ void html2pdf(const std::vector<fs::path>& in_files, const std::vector<fs::path>
       "$dompdf->setHttpContext($context);\n" ;
   }
 
+  script <<
     "$html_content = file_get_contents(\"$argv[1]\");\n"
     "$dompdf->loadHtml($html_content);\n"
     "$dompdf->render();\n"
