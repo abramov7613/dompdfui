@@ -83,6 +83,7 @@ std::tuple<int, std::vector<fs::path>, std::vector<fs::path>, po::variables_map>
         ("no-clean,n", po::bool_switch(), "don't clean temp files on exit")
         ("php-memory-limit,m", po::value<unsigned long long>()->default_value(268435456), "Limits the amount of memory (in bytes) a php-cli can use.")
         ("force-out,f", po::bool_switch(), "replace output file if exists")
+        ("keep-php-scripts,k", po::bool_switch(), "don't remove generated php scripts in temp directory; ignore if --no-clean=false.")
         ("help,h", "view this help message")
         ("version,v", "print version")
         ;
@@ -95,6 +96,7 @@ std::tuple<int, std::vector<fs::path>, std::vector<fs::path>, po::variables_map>
         ("isJavascriptEnabled", po::value<bool>()->default_value(true))
         ("isHtml5ParserEnabled", po::value<bool>()->default_value(true))
         ("isFontSubsettingEnabled", po::value<bool>()->default_value(true))
+        ("sslAllowSelfSigned", po::value<bool>()->default_value(true))
         ("debugPng", po::value<bool>()->default_value(false))
         ("debugKeepTemp", po::value<bool>()->default_value(false))
         ("debugCss", po::value<bool>()->default_value(false))
@@ -279,8 +281,20 @@ void html2pdf(const std::vector<fs::path>& in_files, const std::vector<fs::path>
     "$options->setAllowedRemoteHosts(" << php_array(opts["allowedRemoteHosts"].as<std::vector<std::string>>()) <<
     ");\n" ;
 
-  script <<
-    "\n$dompdf = new Dompdf($options);\n"
+  script << "\n$dompdf = new Dompdf($options);\n" ;
+
+  if( opts["sslAllowSelfSigned"].as<bool>() ){
+    script <<
+      "$context = stream_context_create([\n"
+      "  'ssl' => [\n"
+      "    'verify_peer' => FALSE,\n"
+      "    'verify_peer_name' => FALSE,\n"
+      "    'allow_self_signed'=> TRUE\n"
+      "  ]\n"
+      "]);\n"
+      "$dompdf->setHttpContext($context);\n" ;
+  }
+
     "$html_content = file_get_contents(\"$argv[1]\");\n"
     "$dompdf->loadHtml($html_content);\n"
     "$dompdf->render();\n"
@@ -308,7 +322,7 @@ void html2pdf(const std::vector<fs::path>& in_files, const std::vector<fs::path>
                                 + ifile + "\n\t" + ofile + '\n');
   }
 
-  fs::remove(script_path);
+  if( !cleanup_on_exit && !opts["keep-php-scripts"].as<bool>()  ) fs::remove(script_path);
 }
 
 
