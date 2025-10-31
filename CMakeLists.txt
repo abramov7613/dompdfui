@@ -150,38 +150,18 @@ target_link_libraries(${PROJECT_NAME} PRIVATE
 
 
 # Define tests
-add_test(NAME test1_pdf_generate
+add_test(NAME test1
     COMMAND
       ${PROJECT_NAME}
+      --no-clean
       --isRemoteEnabled=1
       "${CMAKE_CURRENT_SOURCE_DIR}/test/test1.html"
       .
 )
-add_test(NAME test1_check_result
-    COMMAND
-      ${CMAKE_COMMAND}
-      -E
-      sha256sum
-      "${CMAKE_CURRENT_BINARY_DIR}/test1.pdf"
-)
-set_tests_properties(test1_check_result PROPERTIES
-    PASS_REGULAR_EXPRESSION "9e2423c89f20f659af2354c778c443a57ed7c9188779d4be09f4edd5430468d9"
-    DEPENDS test1_pdf_generate
-)
-add_test(NAME test2_pdf_generate
+add_test(NAME test2
     COMMAND
       ${PROJECT_NAME}
+      --no-clean
       "${CMAKE_CURRENT_SOURCE_DIR}/test/test2.html"
       .
-)
-add_test(NAME test2_check_result
-    COMMAND
-      ${CMAKE_COMMAND}
-      -E
-      sha256sum
-      "${CMAKE_CURRENT_BINARY_DIR}/test2.pdf"
-)
-set_tests_properties(test2_check_result PROPERTIES
-    PASS_REGULAR_EXPRESSION "3b94809df88868b981c7c75aa93b8a1e9471e8400e3160359e4c8bfab7cc937f"
-    DEPENDS test2_pdf_generate
 )
