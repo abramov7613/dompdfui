@@ -1,0 +1,182 @@
+<!DOCTYPE html>
+<html>
+
+<head>
+  <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+  <link href="https://fonts.googleapis.com/css2?family=Tangerine&display=swap" rel="stylesheet" />
+  <style>
+    .t {
+      font-family: 'Tangerine';
+      font-size: 300%;
+    }
+    .px60 {
+      font-size: 60px;
+    }
+    table, th, td {
+      border: 1px solid black;
+      border-collapse: collapse;
+    }
+    th, td {
+      padding: 5px;
+    }
+    table.first {
+      border-collapse: collapse;
+      width: 100%;
+    }
+    table.first td, th {
+      border: 1px solid #dddddd;
+      text-align: left;
+      padding: 8px;
+    }
+    table.first tr:nth-child(even) {
+      background-color: #dddddd;
+    }
+    table.names {
+      width:100%;
+    }
+    table.names tr:nth-child(even) {
+      background-color: #eee;
+    }
+    table.names tr:nth-child(odd) {
+      background-color:#fff;
+    }
+    table.names th {
+      background-color: black;
+      color: white
+    }
+    .cities {
+      background-color: black;
+      color: white;
+      padding: 20px;
+    }
+  </style>
+</head>
+
+<body>
+  <h1>Heading 1</h1>
+  <h2>Heading 2</h2>
+  <h3>Heading 3</h3>
+  <h4>Heading 4</h4>
+  <h5>Heading 5</h5>
+  <h6>Heading 6</h6>
+  <h1 class="px60">The span element</h1>
+  <p>My mother has <span style="color:blue;font-weight:bold;">blue</span> eyes and my father has <span style="color:darkolivegreen;font-weight:bold;">dark green</span> eyes.</p>
+  <h1>External Tangerine font demo</h1>
+  <p class="t">The P and the DIV elements are both block elements, and they will always start on a new line and take up the full width available (stretches out to the left and right as far as it can).</p>
+
+  <div style="page-break-after: always;"></div>
+
+  <h1>Image from Another Server</h1>
+  <p><img src="https://www.w3schools.com/images/w3schools_green.jpg" alt="W3Schools.com" style="width:104px;height:142px;"></p>
+
+  <div style="page-break-after: always;"></div>
+
+  <h1>Tables Demo</h1>
+  <p>
+      <table class="first">
+          <tr>
+              <th>Company</th>
+              <th>Contact</th>
+              <th>Country</th>
+          </tr>
+          <tr>
+              <td>Alfreds Futterkiste</td>
+              <td>Maria Anders</td>
+              <td>Germany</td>
+          </tr>
+          <tr>
+              <td>Centro comercial Moctezuma</td>
+              <td>Francisco Chang</td>
+              <td>Mexico</td>
+          </tr>
+          <tr>
+              <td>Ernst Handel</td>
+              <td>Roland Mendel</td>
+              <td>Austria</td>
+          </tr>
+          <tr>
+              <td>Island Trading</td>
+              <td>Helen Bennett</td>
+              <td>UK</td>
+          </tr>
+          <tr>
+              <td>Laughing Bacchus Winecellars</td>
+              <td>Yoshi Tannamuri</td>
+              <td>Canada</td>
+          </tr>
+          <tr>
+              <td>Magazzini Alimentari Riuniti</td>
+              <td>Giovanni Rovelli</td>
+              <td>Italy</td>
+          </tr>
+      </table>
+  </p>
+  <p>
+      <table class="names">
+          <tr>
+              <th>Firstname</th>
+              <th>Lastname</th>
+              <th>Age</th>
+          </tr>
+          <tr>
+              <td>Jill</td>
+              <td>Smith</td>
+              <td>50</td>
+          </tr>
+          <tr>
+              <td>Eve</td>
+              <td>Jackson</td>
+              <td>94</td>
+          </tr>
+          <tr>
+              <td>John</td>
+              <td>Doe</td>
+              <td>80</td>
+          </tr>
+      </table>
+  </p>
+  <p>
+      <table class="nested">
+          <tr>
+              <td>
+                  <p>This is a paragraph</p>
+                  <p>This is another paragraph</p>
+              </td>
+              <td>This cell contains a table:
+                  <table>
+                      <tr>
+                          <td>A</td>
+                          <td>B</td>
+                      </tr>
+                      <tr>
+                          <td>C</td>
+                          <td>D</td>
+                      </tr>
+                  </table>
+              </td>
+          </tr>
+          <tr>
+              <td>This cell contains a list
+                  <ul>
+                      <li>apples</li>
+                      <li>bananas</li>
+                      <li>pineapples</li>
+                  </ul>
+              </td>
+              <td>HELLO</td>
+          </tr>
+      </table>
+  </p>
+
+  <div style="page-break-after: always;"></div>
+
+  <h2>The class Attribute</h2>
+  <p>Use CSS to style an element with the class name "cities":</p>
+  <div class="cities">
+      <h2>London</h2>
+      <p>London is the capital of England. It is the most populous city in the United Kingdom, with a metropolitan area of over 13 million inhabitants.</p>
+      <p>Standing on the River Thames, London has been a major settlement for two millennia, its history going back to its founding by the Romans, who named it Londinium.</p>
+  </div>
+</body>
+
+</html>

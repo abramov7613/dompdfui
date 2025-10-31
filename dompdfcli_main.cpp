@@ -80,12 +80,12 @@ std::tuple<int, std::vector<fs::path>, std::vector<fs::path>, po::variables_map>
 
     po::options_description popts("Program Options");
     popts.add_options()
-        ("no-clean,n", po::bool_switch(), "don't clean temp files on exit")
         ("php-memory-limit,m", po::value<unsigned long long>()->default_value(268435456), "Limits the amount of memory (in bytes) a php-cli can use.")
-        ("force-out,f", po::bool_switch(), "replace output file if exists")
-        ("keep-php-scripts,k", po::bool_switch(), "don't remove generated php scripts in temp directory; ignore if --no-clean=false.")
-        ("help,h", "view this help message")
         ("version,v", "print version")
+        ("help,h", "view this help message")
+        ("force-out,f", po::bool_switch(), "replace output file if exists")
+        ("no-clean,n", po::bool_switch(), "don't clean temp files on exit; use when running multiple instances")
+        ("keep-php-scripts,k", po::bool_switch(), "don't remove generated php scripts in temp directory; ignore if --no-clean is not set")
         ;
 
     po::options_description dopts("DomPdf Options");
@@ -200,7 +200,7 @@ void html2pdf(const std::vector<fs::path>& in_files, const std::vector<fs::path>
   auto milliseconds = std::chrono::duration_cast<std::chrono::milliseconds>(now.time_since_epoch()) % 1000;
   std::tm *local_time = std::localtime(&now_c);
   std::stringstream ss;
-  ss << std::put_time(local_time, "html2pdf_%d%B%Y_%HH%MM%Ss") << std::setfill('0')
+  ss << std::put_time(local_time, "html2pdf_%d%B%Y_%Hh%Mm%Ss") << std::setfill('0')
      << std::setw(3) << milliseconds.count() << "ms.php" ;
   auto script_path = temp_path() / ss.str() ;
   nw::ofstream script( script_path ) ;
@@ -283,7 +283,7 @@ void html2pdf(const std::vector<fs::path>& in_files, const std::vector<fs::path>
 
   script << "\n$dompdf = new Dompdf($options);\n" ;
 
-  if( opts["sslAllowSelfSigned"].as<bool>() ){
+  if( opts["isRemoteEnabled"].as<bool>() && opts["sslAllowSelfSigned"].as<bool>() ) {
     script <<
       "$context = stream_context_create([\n"
       "  'ssl' => [\n"

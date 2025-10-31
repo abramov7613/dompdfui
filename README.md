@@ -10,7 +10,7 @@ You can build from source or download release from https://github.com/abramov761
 dompdfui [OPTIONS] INPUT-FILE1 [INPUT-FILE2] [INPUT-FILE3] [...] OUTPUT-DIR
 ```
 
-At least one input file and output directory must be specified. The output file is saved in the specified directory with the extension changed to pdf. Options are divided into two categories: for application and for Dompdf library.
+At least one input file and output directory must be specified. The program extracts the PHP interpreter and Dompdf library into a temporary directory, and deletes it after completion if the `--no-clean` option is not specified. So this option can be useful to speed up work with frequent launches, and is necessary when running multiple instances of the application at the same time. The output file is saved in the specified directory with the extension changed to pdf. Options are divided into two categories: for application and for Dompdf library:
 
 ### Application Options
 
@@ -18,9 +18,10 @@ At least one input file and output directory must be specified. The output file 
 | ----------- | ------------ | ------- | ----------- |
 | `-v` | `--version` || print version |
 | `-h` | `--help` || print help message |
-| `-n` | `--no-clean` || don't clean temp files on exit |
+| `-n` | `--no-clean` || don't clean temp files on exit; use when running multiple instances |
 | `-m` | `--php-memory-limit` | 268435456 | Limits the amount of memory (in bytes) a php-cli can use |
 | `-f` | `--force-out` || replace output file if exists |
+| `-k` | `--keep-php-scripts` || don't remove generated php scripts in temp directory; ignore if `--no-clean` is not set |
 
 ### Dompdf library Options
 
@@ -32,6 +33,7 @@ At least one input file and output directory must be specified. The output file 
 | `--isJavascriptEnabled` | true | Enable inline JavaScript. If this setting is set to true then DOMPDF will automatically insert JavaScript code contained within `<script type="text/javascript"> ... </script>` tags as written into the PDF. NOTE: This is PDF-based JavaScript to be executed by the PDF viewer, not browser-based JavaScript executed by Dompdf. |
 | `--isHtml5ParserEnabled` | true | Use the HTML5 Lib parser. Deprecated |
 | `--isFontSubsettingEnabled` | true | Whether to enable font subsetting or not. |
+| `--sslAllowSelfSigned` | true | Enable downloading fonts or images that are hosted on a server with a self-signed security certificate or other certificate problems; ignore if `--isRemoteEnabled=false` |
 | `--debugPng` | false |  |
 | `--debugKeepTemp` | false |  |
 | `--debugCss` | false |  |
@@ -58,7 +60,7 @@ At least one input file and output directory must be specified. The output file 
 
 Additional documentation is available on the dompdf wiki at: https://github.com/dompdf/dompdf/wiki
 
-## Build
+## Build from source
 
 Regardless of your system, you need to install:
  - GCC 12.2 or higher (MinGW on Windows)
