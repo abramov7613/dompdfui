@@ -360,9 +360,9 @@ void extract_embedded_resources(const po::variables_map& opts)
   php_exe_target_path /= "php.exe" ;
   if(!fs::exists(php_exe_target_path)) {
     extract(php_rsc_p, php_rsc_sz, php_exe_target_path) ;
-#if BOOST_OS_UNIX
+  #if BOOST_OS_UNIX
     fs::permissions(php_exe_target_path, fs::perms::owner_all | fs::perms::group_all, fs::perm_options::add);
-#endif
+  #endif
   }
   auto dompdf_target_path = temp_path() / "dompdf.zip" ;
   if(!fs::exists(dompdf_target_path)){
@@ -380,9 +380,7 @@ void extract_embedded_resources(const po::variables_map& opts)
       std::array cmd = {
         (temp_path() / "php.exe").string(),
         std::string{"-r"},
-        std::string{"\""},
         unzipscript,
-        std::string{"\""},
       };
       std::string working_directory = temp_path().string() ;
       reproc::options options;
