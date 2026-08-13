@@ -1,5 +1,6 @@
 #include <string>
 #include <vector>
+#include <array>
 #include <tuple>
 #include <filesystem>
 #include <stdexcept>
@@ -16,6 +17,7 @@
 #include <boost/tokenizer.hpp>
 #include <boost/predef.h>
 #include <boost/version.hpp>
+#include <reproc++/run.hpp>
 #include "embed_resources.h"
 #include "timestamp.h"
 
@@ -307,20 +309,24 @@ void html2pdf(const std::vector<fs::path>& in_files, const std::vector<fs::path>
   script.close();
   nw::cout.flush();
 
+  std::string working_directory = temp_path().string();
   for(size_t i=0; i<in_files.size(); ++i) {
-    std::string ifile = in_files[i].string();
-    std::string ofile = out_files[i].string();
-    std::string memlimit = std::to_string( opts["php-memory-limit"].as<unsigned long long>() );
-    std::string cmd = "php.exe -d memory_limit=" + memlimit + " \"" + script_path.filename().string()
-                      + "\" \"" + ifile + "\" \"" + ofile + "\"" ;
-#if BOOST_OS_WINDOWS
-    cmd = temp_path().root_name().string() + " && cd \"" + temp_path().string() + "\" && " + cmd ;
-#else
-    cmd = "cd \"" + temp_path().string() + "\" && ./" + cmd ;
-#endif
-    if( nw::system(cmd.c_str()) )
+    std::string memlimit = "memory_limit=" + std::to_string( opts["php-memory-limit"].as<unsigned long long>() );
+    std::array cmd = {
+      std::string{"php.exe"},
+      std::string{"-d"},
+      std::string{memlimit},
+      std::string{script_path.filename().string()},
+      std::string{in_files[i].string()},
+      std::string{out_files[i].string()},
+    };
+    reproc::options options;
+    options.redirect.parent = true;
+    options.working_directory = working_directory.data();
+    auto[status, error_code] = reproc::run(cmd, options);
+    if( error_code )
       throw std::runtime_error("Can't execute '" + script_path.filename().string() + "' with files:\n\t"
-                                + ifile + "\n\t" + ofile + '\n');
+                                + ifile + "\n\t" + ofile + "\n\t" + error_code.message() + '\n');
   }
 
   if( !cleanup_on_exit && !opts["keep-php-scripts"].as<bool>()  ) fs::remove(script_path);

@@ -68,13 +68,22 @@ set(Boost_USE_STATIC_LIBS        ON)  # only find static libs
 set(Boost_USE_DEBUG_LIBS        OFF)  # ignore debug libs and
 set(Boost_USE_RELEASE_LIBS       ON)  # only find release libs
 set(Boost_USE_STATIC_RUNTIME     ON)
-find_package(Boost 1.86.0 REQUIRED COMPONENTS program_options nowide tokenizer predef)
+find_package(Boost 1.86.0 CONFIG REQUIRED COMPONENTS program_options nowide tokenizer predef)
 
 
 # Get timestamp library
 CPMAddPackage("gh:abramov7613/cmake_timestamp@1.0.3")
 if (NOT cmake_timestamp_ADDED)
   message(FATAL_ERROR "Can't get cmake_timestamp library")
+endif()
+
+
+CPMAddPackage(
+  URI "gh:DaanDeMeyer/reproc@14.2.7"
+  OPTIONS "REPROC++ ON"
+)
+if (NOT reproc_ADDED)
+  message(FATAL_ERROR "Can't get reproc library")
 endif()
 
 
@@ -145,6 +154,7 @@ target_link_libraries(${PROJECT_NAME} PRIVATE
     Boost::tokenizer
     embedded_resources
     cmake_timestamp
+    reproc++
     -static
 )
 
