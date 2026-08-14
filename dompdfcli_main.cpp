@@ -1,5 +1,6 @@
 #include <string>
 #include <vector>
+#include <array>
 #include <tuple>
 #include <filesystem>
 #include <stdexcept>
@@ -16,6 +17,7 @@
 #include <boost/tokenizer.hpp>
 #include <boost/predef.h>
 #include <boost/version.hpp>
+#include <reproc++/run.hpp>
 #include "embed_resources.h"
 #include "timestamp.h"
 
@@ -37,8 +39,6 @@ int return_code {};
 int main(int argc, char** argv)
 {
   try {
-    if(!nw::system(nullptr))
-      throw std::runtime_error("the command processor is not exists");
     nw::args utf8_args (argc, argv);
     auto [parse_result, in_files, out_files, opts] = parse_cli_args(argc, argv) ;
     if( parse_result!=1 ) {
@@ -307,20 +307,25 @@ void html2pdf(const std::vector<fs::path>& in_files, const std::vector<fs::path>
   script.close();
   nw::cout.flush();
 
+  std::string working_directory = temp_path().string() ;
+
   for(size_t i=0; i<in_files.size(); ++i) {
-    std::string ifile = in_files[i].string();
-    std::string ofile = out_files[i].string();
-    std::string memlimit = std::to_string( opts["php-memory-limit"].as<unsigned long long>() );
-    std::string cmd = "php.exe -d memory_limit=" + memlimit + " \"" + script_path.filename().string()
-                      + "\" \"" + ifile + "\" \"" + ofile + "\"" ;
-#if BOOST_OS_WINDOWS
-    cmd = temp_path().root_name().string() + " && cd \"" + temp_path().string() + "\" && " + cmd ;
-#else
-    cmd = "cd \"" + temp_path().string() + "\" && ./" + cmd ;
-#endif
-    if( nw::system(cmd.c_str()) )
+    std::string memlimit = "memory_limit=" + std::to_string( opts["php-memory-limit"].as<unsigned long long>() );
+    std::array cmd = {
+      (temp_path() / "php.exe").string(),
+      std::string{"-d"},
+      memlimit,
+      script_path.filename().string(),
+      in_files[i].string(),
+      out_files[i].string(),
+    };
+    reproc::options options;
+    options.redirect.parent = true;
+    options.working_directory = working_directory.data();
+    auto[status, error_code] = reproc::run(cmd, options);
+    if( status || error_code )
       throw std::runtime_error("Can't execute '" + script_path.filename().string() + "' with files:\n\t"
-                                + ifile + "\n\t" + ofile + '\n');
+              + in_files[i].string() + "\n\t" + out_files[i].string() + "\n\t" + error_code.message() + '\n');
   }
 
   if( !cleanup_on_exit && !opts["keep-php-scripts"].as<bool>()  ) fs::remove(script_path);
@@ -330,7 +335,7 @@ void html2pdf(const std::vector<fs::path>& in_files, const std::vector<fs::path>
 // function return application specific temp path
 fs::path temp_path()
 {
-  std::string dir_name = "dompdfui_" + std::string(git_hash_str);
+  static const std::string dir_name = "dompdfui_" + std::string(git_hash_str);
   return fs::temp_directory_path() / dir_name ;
 }
 
@@ -355,9 +360,9 @@ void extract_embedded_resources(const po::variables_map& opts)
   php_exe_target_path /= "php.exe" ;
   if(!fs::exists(php_exe_target_path)) {
     extract(php_rsc_p, php_rsc_sz, php_exe_target_path) ;
-#if BOOST_OS_UNIX
+  #if BOOST_OS_UNIX
     fs::permissions(php_exe_target_path, fs::perms::owner_all | fs::perms::group_all, fs::perm_options::add);
-#endif
+  #endif
   }
   auto dompdf_target_path = temp_path() / "dompdf.zip" ;
   if(!fs::exists(dompdf_target_path)){
@@ -365,8 +370,6 @@ void extract_embedded_resources(const po::variables_map& opts)
     auto dompdf_dir = temp_path() / "dompdf" ;
     if(fs::exists(dompdf_dir) && !fs::is_directory(dompdf_dir)) fs::remove(dompdf_dir) ;
     if(!fs::exists(dompdf_dir)){
-      nw::cout.flush();
-#if BOOST_OS_WINDOWS
       std::string unzipscript = "$zip = new ZipArchive; "
                                 "if ($zip->open('dompdf.zip') === TRUE) { "
                                 "   $zip->extractTo('.'); "
@@ -374,20 +377,17 @@ void extract_embedded_resources(const po::variables_map& opts)
                                 "} else { "
                                 "   exit(-1); "
                                 "}" ;
-      std::string cmd = temp_path().root_name().string() + " && cd \""
-                        + temp_path().string() + "\" && php.exe -r \"" + unzipscript + "\"";
-#else
-      std::string unzipscript = "\\$zip = new ZipArchive; "
-                                "if (\\$zip->open('dompdf.zip') === TRUE) { "
-                                "   \\$zip->extractTo('.'); "
-                                "   \\$zip->close(); "
-                                "} else { "
-                                "   exit(-1); "
-                                "}" ;
-      std::string cmd = "cd \"" + temp_path().string() + "\" && ./php.exe -r \"" + unzipscript + "\"";
-#endif
-      if( nw::system(cmd.c_str()) )
-        throw std::runtime_error("Can't unzip 'dompdf.zip' file");
+      std::array cmd = {
+        (temp_path() / "php.exe").string(),
+        std::string{"-r"},
+        unzipscript,
+      };
+      std::string working_directory = temp_path().string() ;
+      reproc::options options;
+      options.redirect.parent = true;
+      options.working_directory = working_directory.data();
+      auto[status, error_code] = reproc::run(cmd, options);
+      if( status || error_code ) throw std::runtime_error("Can't unzip 'dompdf.zip' file");
     }
   }
 }
