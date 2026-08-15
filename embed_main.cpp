@@ -73,9 +73,10 @@ int main(int argc, char** argv)
     });
     if(duplicate != infiles.end()){
       nw::cout << "Found files with identical names. Only the first one will be processed\n";
-      std::unique(infiles.begin(), infiles.end(), [](const auto& e1, const auto& e2){
+      auto last = std::unique(infiles.begin(), infiles.end(), [](const auto& e1, const auto& e2){
         return e1.filename().string() == e2.filename().string() ;
       });
+      infiles.erase(last, infiles.end());
     }
     embed_resources_h <<
       "#include <string>\n"
