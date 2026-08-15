@@ -163,15 +163,15 @@ target_link_libraries(${PROJECT_NAME} PRIVATE
 add_test(NAME test1
     COMMAND
       ${PROJECT_NAME}
-      --no-clean
       --isRemoteEnabled=1
+      --force-out
       "${CMAKE_CURRENT_SOURCE_DIR}/test/test1.html"
       .
 )
 add_test(NAME test2
     COMMAND
       ${PROJECT_NAME}
-      --no-clean
+      --force-out
       "${CMAKE_CURRENT_SOURCE_DIR}/test/test2.html"
       .
 )

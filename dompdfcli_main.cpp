@@ -9,6 +9,7 @@
 #include <chrono>
 #include <iomanip>
 #include <ctime>
+#include <random>
 #include <boost/nowide/args.hpp>
 #include <boost/nowide/cstdlib.hpp>
 #include <boost/nowide/fstream.hpp>
@@ -32,32 +33,28 @@ void html2pdf(const std::vector<fs::path>&, const std::vector<fs::path>&, const 
 fs::path temp_path() ;
 
 
-bool cleanup_on_exit {};
-int return_code {};
-
-
 int main(int argc, char** argv)
+try
 {
-  try {
-    nw::args utf8_args (argc, argv);
-    auto [parse_result, in_files, out_files, opts] = parse_cli_args(argc, argv) ;
-    if( parse_result!=1 ) {
-      return_code = parse_result ;
-    } else {
-      extract_embedded_resources(opts);
-      html2pdf(in_files, out_files, opts);
-    }
+  nw::args utf8_args (argc, argv);
+  auto [parse_result, in_files, out_files, opts] = parse_cli_args(argc, argv) ;
+  if( parse_result==1 ) {
+    parse_result = 0;
+    extract_embedded_resources(opts);
+    html2pdf(in_files, out_files, opts);
   }
-  catch (const std::exception& e) {
-    nw::cout << "Error: " << e.what() << '\n';
-    return_code = -1;
-  }
-  catch (...) {
-    nw::cout << "Error: Unknown exception\n" ;
-    return_code = -1;
-  }
-  if (cleanup_on_exit) fs::remove_all(temp_path());
-  return return_code;
+  fs::remove_all(temp_path());
+  return parse_result;
+}
+catch (const std::exception& e)
+{
+  nw::cout << "Error: " << e.what() << '\n';
+  return -1;
+}
+catch (...)
+{
+  nw::cout << "Error: Unknown exception\n" ;
+  return -1;
 }
 
 
@@ -84,41 +81,20 @@ std::tuple<int, std::vector<fs::path>, std::vector<fs::path>, po::variables_map>
         ("version,v", "print version")
         ("help,h", "view this help message")
         ("force-out,f", po::bool_switch(), "replace output file if exists")
-        ("no-clean,n", po::bool_switch(), "don't clean temp files on exit; use when running multiple instances")
-        ("keep-php-scripts,k", po::bool_switch(), "don't remove generated php scripts in temp directory; ignore if --no-clean is not set")
         ;
 
     po::options_description dopts("DomPdf Options");
     dopts.add_options()
-        ("isPhpEnabled", po::value<bool>()->default_value(false))
         ("isRemoteEnabled", po::value<bool>()->default_value(false))
-        ("isPdfAEnabled", po::value<bool>()->default_value(false))
         ("isJavascriptEnabled", po::value<bool>()->default_value(true))
-        ("isHtml5ParserEnabled", po::value<bool>()->default_value(true))
         ("isFontSubsettingEnabled", po::value<bool>()->default_value(true))
-        ("sslAllowSelfSigned", po::value<bool>()->default_value(true))
-        ("debugPng", po::value<bool>()->default_value(false))
-        ("debugKeepTemp", po::value<bool>()->default_value(false))
-        ("debugCss", po::value<bool>()->default_value(false))
-        ("debugLayout", po::value<bool>()->default_value(false))
-        ("debugLayoutLines", po::value<bool>()->default_value(true))
-        ("debugLayoutBlocks", po::value<bool>()->default_value(true))
-        ("debugLayoutInline", po::value<bool>()->default_value(true))
-        ("debugLayoutPaddingBox", po::value<bool>()->default_value(true))
+        ("sslAllowSelfSigned", po::value<bool>()->default_value(false))
         ("dpi", po::value<std::string>()->default_value("96"))
         ("fontHeightRatio", po::value<std::string>()->default_value("1.1"))
-        ("rootDir", po::value<std::string>())
-        ("tempDir", po::value<std::string>())
-        ("fontDir", po::value<std::string>())
-        ("fontCache", po::value<std::string>())
-        ("logOutputFile", po::value<std::string>())
         ("defaultMediaType", po::value<std::string>()->default_value("screen"))
         ("defaultPaperSize", po::value<std::string>()->default_value("a4"))
         ("defaultPaperOrientation", po::value<std::string>()->default_value("portrait"))
         ("defaultFont", po::value<std::string>()->default_value("dejavu serif"))
-        ("pdfBackend", po::value<std::string>()->default_value("CPDF"))
-        ("pdflibLicense", po::value<std::string>())
-        ("chroot", po::value<std::vector<std::string>>())
         ("allowedRemoteHosts", po::value<std::vector<std::string>>())
         ;
 
@@ -181,8 +157,6 @@ std::tuple<int, std::vector<fs::path>, std::vector<fs::path>, po::variables_map>
       });
       if( already_exists ) return {-1, {}, {}, {}};
     }
-
-    cleanup_on_exit = !vm["no-clean"].as<bool>() ;
   }
   catch(const po::error& e) {
     nw::cout << "Error: " << e.what() << "\nTry:\t" << argv[0] << " --help\n";
@@ -232,50 +206,25 @@ void html2pdf(const std::vector<fs::path>& in_files, const std::vector<fs::path>
     "use Dompdf\\Dompdf;\n"
     "use Dompdf\\Options;\n\n"
     "$options = new Options();\n"
-    "$options->setIsPhpEnabled("                    << opts["isPhpEnabled"].as<bool>() << ");\n"
+    "$options->setIsPhpEnabled(FALSE);\n"
+    "$options->setIsPdfAEnabled(FALSE);\n"
+    "$options->setDebugPng(FALSE);\n"
+    "$options->setDebugKeepTemp(FALSE);\n"
+    "$options->setDebugCss(FALSE);\n"
+    "$options->setDebugLayout(FALSE);\n"
+    "$options->setDebugLayoutLines(TRUE);\n"
+    "$options->setDebugLayoutBlocks(TRUE);\n"
+    "$options->setDebugLayoutInline(TRUE);\n"
+    "$options->setDebugLayoutPaddingBox(TRUE);\n"
     "$options->setIsRemoteEnabled("                 << opts["isRemoteEnabled"].as<bool>() << ");\n"
-    "$options->setIsPdfAEnabled("                   << opts["isPdfAEnabled"].as<bool>() << ");\n"
     "$options->setIsJavascriptEnabled("             << opts["isJavascriptEnabled"].as<bool>() << ");\n"
-    "$options->setIsHtml5ParserEnabled("            << opts["isHtml5ParserEnabled"].as<bool>() << ");\n"
     "$options->setIsFontSubsettingEnabled("         << opts["isFontSubsettingEnabled"].as<bool>() << ");\n"
-    "$options->setDebugPng("                        << opts["debugPng"].as<bool>() << ");\n"
-    "$options->setDebugKeepTemp("                   << opts["debugKeepTemp"].as<bool>() << ");\n"
-    "$options->setDebugCss("                        << opts["debugCss"].as<bool>() << ");\n"
-    "$options->setDebugLayout("                     << opts["debugLayout"].as<bool>() << ");\n"
-    "$options->setDebugLayoutLines("                << opts["debugLayoutLines"].as<bool>() << ");\n"
-    "$options->setDebugLayoutBlocks("               << opts["debugLayoutBlocks"].as<bool>() << ");\n"
-    "$options->setDebugLayoutInline("               << opts["debugLayoutInline"].as<bool>() << ");\n"
-    "$options->setDebugLayoutPaddingBox("           << opts["debugLayoutPaddingBox"].as<bool>() << ");\n"
     "$options->setDpi("                             << opts["dpi"].as<std::string>() << ");\n"
-    "$options->setFontHeightRatio("                 << opts["fontHeightRatio"].as<std::string>() << ");\n" ;
-
-  if(opts.count("rootDir")) script <<
-    "$options->setRootDir('"                        << opts["rootDir"].as<std::string>() << "');\n" ;
-
-  if(opts.count("tempDir")) script <<
-    "$options->setTempDir('"                        << opts["tempDir"].as<std::string>() << "');\n" ;
-
-  if(opts.count("fontDir")) script <<
-    "$options->setFontDir('"                        << opts["fontDir"].as<std::string>() << "');\n" ;
-
-  if(opts.count("fontCache")) script <<
-    "$options->setFontCache('"                      << opts["fontCache"].as<std::string>() << "');\n" ;
-
-  if(opts.count("logOutputFile")) script <<
-    "$options->setLogOutputFile('"                  << opts["logOutputFile"].as<std::string>() << "');\n" ;
-
-  script <<
+    "$options->setFontHeightRatio("                 << opts["fontHeightRatio"].as<std::string>() << ");\n"
     "$options->setDefaultMediaType('"               << opts["defaultMediaType"].as<std::string>() << "');\n"
     "$options->setDefaultPaperSize('"               << opts["defaultPaperSize"].as<std::string>() << "');\n"
     "$options->setDefaultPaperOrientation('"        << opts["defaultPaperOrientation"].as<std::string>() << "');\n"
-    "$options->setDefaultFont('"                    << opts["defaultFont"].as<std::string>() << "');\n"
-    "$options->setPdfBackend('"                     << opts["pdfBackend"].as<std::string>() << "');\n" ;
-
-  if(opts.count("pdflibLicense")) script <<
-    "$options->setPdflibLicense('"                  << opts["pdflibLicense"].as<std::string>() << "');\n" ;
-
-  if(opts.count("chroot")) script <<
-    "$options->setChroot(" << php_array(opts["chroot"].as<std::vector<std::string>>()) << ");\n" ;
+    "$options->setDefaultFont('"                    << opts["defaultFont"].as<std::string>() << "');\n" ;
 
   if(opts.count("allowedRemoteHosts")) script <<
     "$options->setAllowedRemoteHosts(" << php_array(opts["allowedRemoteHosts"].as<std::vector<std::string>>()) <<
@@ -327,16 +276,21 @@ void html2pdf(const std::vector<fs::path>& in_files, const std::vector<fs::path>
       throw std::runtime_error("Can't execute '" + script_path.filename().string() + "' with files:\n\t"
               + in_files[i].string() + "\n\t" + out_files[i].string() + "\n\t" + error_code.message() + '\n');
   }
-
-  if( !cleanup_on_exit && !opts["keep-php-scripts"].as<bool>()  ) fs::remove(script_path);
 }
 
 
 // function return application specific temp path
 fs::path temp_path()
 {
-  static const std::string dir_name = "dompdfui_" + std::string(git_hash_str);
-  return fs::temp_directory_path() / dir_name ;
+  static std::random_device rd;
+  static std::mt19937 gen(rd());
+  static std::uniform_int_distribution<> distrib(97, 122);
+  static std::string x;
+  if (x.empty()) {
+    for (int i{}; i<24; ++i) x += static_cast<char>(distrib(gen)) ;
+    x = "dompdfui_"  + x ;
+  }
+  return fs::temp_directory_path() / x ;
 }
 
 
