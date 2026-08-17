@@ -2,6 +2,31 @@
 
 This is a small, portable command-line tool that combines [Static-PHP-cli](https://github.com/crazywhalecc/static-php-cli) and the [Dompdf library](https://github.com/dompdf/dompdf) to convert HTML files to PDF on Windows and Linux, without requiring a separate installation of PHP or Dompdf. It is designed for users who need a standalone, offline and single-executable HTML-to-PDF converter. There are no external dependencies, as it uses static linking, and both the PHP interpreter and the Dompdf library itself are built into the executable file. All you need to get started is to download it and run it in a terminal.
 
+## Features
+
+ * Handles most CSS 2.1 and a few CSS3 properties, including @import, @media &
+   @page rules
+ * Supports most presentational HTML 4.0 attributes
+ * Supports external stylesheets, either local or through http/ftp (via
+   fopen-wrappers)
+ * Supports complex tables, including row & column spans, separate & collapsed
+   border models, individual cell styling
+ * Image support (gif, png (8, 24 and 32 bit with alpha channel), bmp & jpeg)
+ * No dependencies on external PDF libraries, thanks to the R&OS PDF class
+ * Basic SVG support (see "Limitations" below)
+
+## Limitations (Known Issues)
+
+ * Table cells are not pageable, meaning a table row must fit on a single page: See https://github.com/dompdf/dompdf/issues/98
+ * Elements are rendered on the active page when they are parsed.
+ * Embedding "raw" SVG's (`<svg><path...></svg>`) isn't working yet: See https://github.com/dompdf/dompdf/issues/320  
+   Workaround: Either link to an external SVG file, or use a DataURI like this:
+     ```php
+     $html = '<img src="data:image/svg+xml;base64,' . base64_encode($svg) . '">';
+     ```
+ * Does not support CSS flexbox: See https://github.com/dompdf/dompdf/issues/971
+ * Does not support CSS Grid: See https://github.com/dompdf/dompdf/issues/2988
+
 ## Usage
 
 You can build from source or download release from [Releases](https://github.com/abramov7613/dompdfui/releases)
