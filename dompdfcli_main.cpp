@@ -1,7 +1,6 @@
 #include <string>
 #include <vector>
 #include <array>
-#include <tuple>
 #include <filesystem>
 #include <stdexcept>
 #include <algorithm>
@@ -25,11 +24,50 @@
 namespace po = boost::program_options;
 namespace fs = std::filesystem ;
 namespace nw = boost::nowide;
+namespace hr = std::chrono;
+
+class ApplicationOptions {
+  unsigned long long php_memory_limit_;
+  bool force_out_;
+  bool isRemoteEnabled_;
+  bool isJavascriptEnabled_;
+  bool isFontSubsettingEnabled_;
+  bool sslAllowSelfSigned_;
+  std::string dpi_;
+  std::string fontHeightRatio_;
+  std::string defaultMediaType_;
+  std::string defaultPaperSize_;
+  std::string defaultPaperOrientation_;
+  std::string defaultFont_;
+  std::vector<std::string> allowedRemoteHosts_;
+  std::vector<fs::path> in_files_;
+  std::vector<fs::path> out_files_;
+public:
+  ApplicationOptions(const po::variables_map& );
+  unsigned long long php_memory_limit() const { return php_memory_limit_; }
+  bool force_out() const { return force_out_; }
+  bool isRemoteEnabled() const { return isRemoteEnabled_; }
+  bool isJavascriptEnabled() const { return isJavascriptEnabled_; }
+  bool isFontSubsettingEnabled() const { return isFontSubsettingEnabled_; }
+  bool sslAllowSelfSigned() const { return sslAllowSelfSigned_; }
+  const std::string& dpi() const { return dpi_; }
+  const std::string& fontHeightRatio() const { return fontHeightRatio_; }
+  const std::string& defaultMediaType() const { return defaultMediaType_; }
+  const std::string& defaultPaperSize() const { return defaultPaperSize_; }
+  const std::string& defaultPaperOrientation() const { return defaultPaperOrientation_; }
+  const std::string& defaultFont() const { return defaultFont_; }
+  const std::vector<std::string>& allowedRemoteHosts() const { return allowedRemoteHosts_; }
+  const std::vector<fs::path>& in_files() const { return in_files_; }
+  const std::vector<fs::path>& out_files() const { return out_files_; }
+};
 
 
-std::tuple<int, std::vector<fs::path>, std::vector<fs::path>, po::variables_map> parse_cli_args(int argc, char** argv) ;
-void extract_embedded_resources(const po::variables_map&) ;
-void html2pdf(const std::vector<fs::path>&, const std::vector<fs::path>&, const po::variables_map&) ;
+class CommandLineHelp {};
+void extract_embedded_resources() ;
+ApplicationOptions parse_cli_args(int argc, char** argv);
+std::pair<std::string, std::string> generate_php_script(const ApplicationOptions&);
+void run_php_script(const std::string& name, const std::string& body, const ApplicationOptions& opts);
+
 fs::path temp_path() ;
 
 
@@ -37,14 +75,16 @@ int main(int argc, char** argv)
 try
 {
   nw::args utf8_args (argc, argv);
-  auto [parse_result, in_files, out_files, opts] = parse_cli_args(argc, argv) ;
-  if( parse_result==1 ) {
-    parse_result = 0;
-    extract_embedded_resources(opts);
-    html2pdf(in_files, out_files, opts);
-  }
+  auto opts = parse_cli_args(argc, argv) ;
+  extract_embedded_resources();
+  auto[script_name, script_body] = generate_php_script(opts);
+  run_php_script(script_name, script_body, opts);
   fs::remove_all(temp_path());
-  return parse_result;
+  return 0;
+}
+catch (const CommandLineHelp&)
+{
+  return 0;
 }
 catch (const std::exception& e)
 {
@@ -58,23 +98,15 @@ catch (...)
 }
 
 
-// function return 4 values:
-//     first is a cli parser result: 1 = OK; 0 = Help; -1 = parser error
-//     second  - array of input files
-//     third   - array of output files
-//     fourth  - boost::program_options::variables_map container with all parameters
-std::tuple<int, std::vector<fs::path>, std::vector<fs::path>, po::variables_map> parse_cli_args(int argc, char** argv)
+ApplicationOptions parse_cli_args(int argc, char** argv)
 {
   static const char* short_descr = "HTML to PDF Converter";
   po::variables_map vm;
-  std::vector<fs::path> in_files, out_files;
-  fs::path out_dir;
   try {
     po::options_description hopts("Hidden options");
     hopts.add_options()
         ("iofiles", po::value<std::vector<std::string>>(), "input output files")
         ;
-
     po::options_description popts("Program Options");
     popts.add_options()
         ("php-memory-limit,m", po::value<unsigned long long>()->default_value(268435456), "Limits the amount of memory (in bytes) a php-cli can use.")
@@ -82,7 +114,6 @@ std::tuple<int, std::vector<fs::path>, std::vector<fs::path>, po::variables_map>
         ("help,h", "view this help message")
         ("force-out,f", po::bool_switch(), "replace output file if exists")
         ;
-
     po::options_description dopts("DomPdf Options");
     dopts.add_options()
         ("isRemoteEnabled", po::value<bool>()->default_value(false))
@@ -97,89 +128,37 @@ std::tuple<int, std::vector<fs::path>, std::vector<fs::path>, po::variables_map>
         ("defaultFont", po::value<std::string>()->default_value("dejavu serif"))
         ("allowedRemoteHosts", po::value<std::vector<std::string>>())
         ;
-
     po::options_description allopts("");
     allopts.add(hopts).add(popts).add(dopts);
     po::positional_options_description p;
     p.add("iofiles", -1);
     po::store(po::command_line_parser(argc, argv).options(allopts).positional(p).run(), vm);
     po::notify(vm);
-
     if (vm.count("help")) {
         nw::cout <<  short_descr << ' ' << git_tag_str << "\nUsage:\t" << argv[0]
                             << " [OPTIONS] INPUT-FILE1 [INPUT-FILE2] [INPUT-FILE3] [...] OUTPUT-DIR \n"
                             << (po::options_description("").add(popts).add(dopts)) << '\n';
-        return {0, {}, {}, {}};
+        throw CommandLineHelp{};
     }
-
     if (vm.count("version")) {
         nw::cout << short_descr << ' ' << git_tag_str << "\nbuilt with: GCC " << __VERSION__
                   << "; boost " << BOOST_VERSION / 100000 << '.' << BOOST_VERSION / 100 % 1000
                   << '.' << BOOST_VERSION % 100 << "; php-cli " << PHPCLI_VERSION
                   << "; dompdf " << DOMPDF_VERSION << "\nbuilt time: " << build_time_str << "\ngit hash: "
                   << git_hash_str << '\n' ;
-        return {0, {}, {}, {}};
-    }
-
-    if (!vm.count("iofiles") || vm["iofiles"].as<std::vector<std::string>>().size()<2) {
-        nw::cout << "Error: the options 'INPUT-FILE1' and 'OUTPUT-DIR' is required but missing\n";
-        return {-1, {}, {}, {}};
-    }
-
-    for(const auto& e: vm["iofiles"].as<std::vector<std::string>>()) in_files.emplace_back(e);
-    std::transform(in_files.begin(), in_files.end(), in_files.begin(), [](auto& e){
-      return fs::absolute(e);
-    });
-    out_dir = in_files.back();
-    in_files.pop_back();
-    if(fs::is_regular_file(out_dir)) out_dir = out_dir.parent_path();
-    if(!fs::exists(out_dir)) fs::create_directory(out_dir);
-    if(!fs::is_directory(out_dir)) {
-        nw::cout << "Error: can't open output directory " << out_dir.string() << '\n' ;
-        return {-1, {}, {}, {}};
-    }
-    std::erase_if(in_files, [](const auto& e){
-      bool remove_element = !fs::exists(e);
-      if(remove_element) nw::cout << "Warning: file '" << e.string() << "' not found\n";
-      return remove_element;
-    });
-    if(in_files.empty()) return {-1, {}, {}, {}};
-
-    std::transform(in_files.begin(), in_files.end(), std::back_inserter(out_files), [&out_dir](const auto& e){
-      return out_dir / e.filename().replace_extension("pdf");
-    });
-
-    if(!vm["force-out"].as<bool>()){
-      bool already_exists = std::any_of(out_files.begin(), out_files.end(), [](const auto& e){
-        bool result = fs::exists(e);
-        if(result) nw::cout << "Warning: file '" << e.string() << "' already exists\n";
-        return result;
-      });
-      if( already_exists ) return {-1, {}, {}, {}};
+        throw CommandLineHelp{};
     }
   }
   catch(const po::error& e) {
-    nw::cout << "Error: " << e.what() << "\nTry:\t" << argv[0] << " --help\n";
-    return {-1, {}, {}, {}};
+    throw std::runtime_error(std::string(e.what()) + "\nTry:\t" + std::string(argv[0]) + " --help");
   }
-  return {1, in_files, out_files, vm};
+  return ApplicationOptions{vm};
 }
 
 
-// function generate php script from Options and run it
-void html2pdf(const std::vector<fs::path>& in_files, const std::vector<fs::path>& out_files, const po::variables_map& opts)
+std::pair<std::string, std::string> generate_php_script(const ApplicationOptions& opts)
 {
-  auto now = std::chrono::system_clock::now();
-  auto now_c = std::chrono::system_clock::to_time_t(now);
-  auto milliseconds = std::chrono::duration_cast<std::chrono::milliseconds>(now.time_since_epoch()) % 1000;
-  std::tm *local_time = std::localtime(&now_c);
-  std::stringstream ss;
-  ss << std::put_time(local_time, "html2pdf_%d%B%Y_%Hh%Mm%Ss") << std::setfill('0')
-     << std::setw(3) << milliseconds.count() << "ms.php" ;
-  auto script_path = temp_path() / ss.str() ;
-  nw::ofstream script( script_path ) ;
-  if(!script.is_open()) throw std::runtime_error("Can't open file: " + script_path.string()) ;
-  auto php_array = [](const std::vector<std::string>& v){
+  auto make_php_array = [](const std::vector<std::string>& v)->std::string{
     std::string r;
     if(v.empty()) return r;
     if(std::all_of(v.begin(), v.end(), [](const auto& e){ return e.empty(); })) return r;
@@ -199,7 +178,14 @@ void html2pdf(const std::vector<fs::path>& in_files, const std::vector<fs::path>
     r += ']';
     return r;
   };
-  script <<
+  auto now = hr::system_clock::now();
+  auto now_c = hr::system_clock::to_time_t(now);
+  auto milliseconds = hr::duration_cast<hr::milliseconds>(now.time_since_epoch()) % 1000;
+  std::tm *local_time = std::localtime(&now_c);
+  std::stringstream script_name, script_body;
+  script_name << std::put_time(local_time, "html2pdf_%d%B%Y_%Hh%Mm%Ss") << std::setfill('0')
+              << std::setw(3) << milliseconds.count() << "ms.php" ;
+  script_body <<
     "<?php\n"
     "if ($argc<3) exit(-1);\n\n"
     "require_once 'dompdf/autoload.inc.php';\n\n"
@@ -216,24 +202,20 @@ void html2pdf(const std::vector<fs::path>& in_files, const std::vector<fs::path>
     "$options->setDebugLayoutBlocks(TRUE);\n"
     "$options->setDebugLayoutInline(TRUE);\n"
     "$options->setDebugLayoutPaddingBox(TRUE);\n"
-    "$options->setIsRemoteEnabled("                 << opts["isRemoteEnabled"].as<bool>() << ");\n"
-    "$options->setIsJavascriptEnabled("             << opts["isJavascriptEnabled"].as<bool>() << ");\n"
-    "$options->setIsFontSubsettingEnabled("         << opts["isFontSubsettingEnabled"].as<bool>() << ");\n"
-    "$options->setDpi("                             << opts["dpi"].as<std::string>() << ");\n"
-    "$options->setFontHeightRatio("                 << opts["fontHeightRatio"].as<std::string>() << ");\n"
-    "$options->setDefaultMediaType('"               << opts["defaultMediaType"].as<std::string>() << "');\n"
-    "$options->setDefaultPaperSize('"               << opts["defaultPaperSize"].as<std::string>() << "');\n"
-    "$options->setDefaultPaperOrientation('"        << opts["defaultPaperOrientation"].as<std::string>() << "');\n"
-    "$options->setDefaultFont('"                    << opts["defaultFont"].as<std::string>() << "');\n" ;
-
-  if(opts.count("allowedRemoteHosts")) script <<
-    "$options->setAllowedRemoteHosts(" << php_array(opts["allowedRemoteHosts"].as<std::vector<std::string>>()) <<
-    ");\n" ;
-
-  script << "\n$dompdf = new Dompdf($options);\n" ;
-
-  if( opts["isRemoteEnabled"].as<bool>() && opts["sslAllowSelfSigned"].as<bool>() ) {
-    script <<
+    "$options->setIsRemoteEnabled("                 << opts.isRemoteEnabled() << ");\n"
+    "$options->setIsJavascriptEnabled("             << opts.isJavascriptEnabled() << ");\n"
+    "$options->setIsFontSubsettingEnabled("         << opts.isFontSubsettingEnabled() << ");\n"
+    "$options->setDpi("                             << opts.dpi() << ");\n"
+    "$options->setFontHeightRatio("                 << opts.fontHeightRatio() << ");\n"
+    "$options->setDefaultMediaType('"               << opts.defaultMediaType() << "');\n"
+    "$options->setDefaultPaperSize('"               << opts.defaultPaperSize() << "');\n"
+    "$options->setDefaultPaperOrientation('"        << opts.defaultPaperOrientation() << "');\n"
+    "$options->setDefaultFont('"                    << opts.defaultFont() << "');\n" ;
+  if(!opts.allowedRemoteHosts().empty())
+    script_body << "$options->setAllowedRemoteHosts(" << make_php_array(opts.allowedRemoteHosts()) << ");\n" ;
+  script_body << "\n$dompdf = new Dompdf($options);\n" ;
+  if( opts.isRemoteEnabled() && opts.sslAllowSelfSigned() ) {
+    script_body <<
       "$context = stream_context_create([\n"
       "  'ssl' => [\n"
       "    'verify_peer' => FALSE,\n"
@@ -243,8 +225,7 @@ void html2pdf(const std::vector<fs::path>& in_files, const std::vector<fs::path>
       "]);\n"
       "$dompdf->setHttpContext($context);\n" ;
   }
-
-  script <<
+  script_body <<
     "$html_content = file_get_contents(\"$argv[1]\");\n"
     "$dompdf->loadHtml($html_content);\n"
     "$dompdf->render();\n"
@@ -253,13 +234,22 @@ void html2pdf(const std::vector<fs::path>& in_files, const std::vector<fs::path>
     "  echo \"Error: can't write to file: $argv[2]\" , PHP_EOL;\n"
     "  exit(-1);\n"
     "}\n" ;
-  script.close();
-  nw::cout.flush();
+  return {script_name.str(), script_body.str()};
+}
 
+
+void run_php_script(const std::string& name, const std::string& body, const ApplicationOptions& opts)
+{
+  auto script_path = temp_path() / name ;
   std::string working_directory = temp_path().string() ;
-
+  nw::ofstream script( script_path ) ;
+  if(!script.is_open()) throw std::runtime_error("Can't open file: " + script_path.string()) ;
+  script << body ;
+  script.close();
+  std::string memlimit = "memory_limit=" + std::to_string( opts.php_memory_limit() );
+  const auto& in_files = opts.in_files();
+  const auto& out_files = opts.out_files();
   for(size_t i=0; i<in_files.size(); ++i) {
-    std::string memlimit = "memory_limit=" + std::to_string( opts["php-memory-limit"].as<unsigned long long>() );
     std::array cmd = {
       (temp_path() / "php.exe").string(),
       std::string{"-d"},
@@ -279,7 +269,6 @@ void html2pdf(const std::vector<fs::path>& in_files, const std::vector<fs::path>
 }
 
 
-// function return application specific temp path
 fs::path temp_path()
 {
   static std::random_device rd;
@@ -294,8 +283,7 @@ fs::path temp_path()
 }
 
 
-// function extract embedded resources
-void extract_embedded_resources(const po::variables_map& opts)
+void extract_embedded_resources()
 {
   auto php_rsc_p = embedded::resource<"php.exe">().data();
   auto php_rsc_sz = embedded::resource<"php.exe">().size();
@@ -344,4 +332,66 @@ void extract_embedded_resources(const po::variables_map& opts)
       if( status || error_code ) throw std::runtime_error("Can't unzip 'dompdf.zip' file");
     }
   }
+}
+
+
+ApplicationOptions::ApplicationOptions(const po::variables_map& vm)
+    :
+    php_memory_limit_{268435456u},
+    force_out_{false},
+    isRemoteEnabled_{false},
+    isJavascriptEnabled_{true},
+    isFontSubsettingEnabled_{true},
+    sslAllowSelfSigned_{false},
+    dpi_{"96"},
+    fontHeightRatio_{"1.1"},
+    defaultMediaType_{"screen"},
+    defaultPaperSize_{"a4"},
+    defaultPaperOrientation_{"portrait"},
+    defaultFont_{"dejavu serif"},
+    allowedRemoteHosts_{},
+    in_files_{},
+    out_files_{}
+{
+  fs::path out_dir;
+  if (!vm.count("iofiles") || vm["iofiles"].as<std::vector<std::string>>().size()<2) {
+      throw std::runtime_error("the options 'INPUT-FILE1' and 'OUTPUT-DIR' is required but missing");
+  }
+  for(const auto& e: vm["iofiles"].as<std::vector<std::string>>()) {
+    if(!fs::exists(e)) throw std::runtime_error('"' + e + "\" not found") ;
+    in_files_.emplace_back(e);
+  }
+  std::transform(in_files_.begin(), in_files_.end(), in_files_.begin(), [](auto& e){
+    return fs::canonical(e);
+  });
+  out_dir = in_files_.back();
+  in_files_.pop_back();
+  if(fs::is_regular_file(out_dir)) out_dir = out_dir.parent_path();
+  if(!fs::exists(out_dir)) fs::create_directory(out_dir);
+  if(!fs::is_directory(out_dir)) {
+      throw std::runtime_error("can't open output directory " + out_dir.string() ) ;
+  }
+  std::transform(in_files_.begin(), in_files_.end(), std::back_inserter(out_files_), [&out_dir](const auto& e){
+    return out_dir / e.filename().replace_extension("pdf");
+  });
+  if (vm.count("php-memory-limit")) php_memory_limit_ = vm["php-memory-limit"].as<unsigned long long>();
+  if (vm.count("force-out")) force_out_ = vm["force-out"].as<bool>();
+  if(!force_out_){
+    auto already_exists = std::find_if(out_files_.begin(), out_files_.end(), [](const auto& e){
+      return fs::exists(e);
+    });
+    if( already_exists!=out_files_.end() )
+      throw std::runtime_error("file '" + already_exists->string() + "' already exists");
+  }
+  if (vm.count("isRemoteEnabled")) isRemoteEnabled_ = vm["isRemoteEnabled"].as<bool>() ;
+  if (vm.count("isJavascriptEnabled")) isJavascriptEnabled_ = vm["isJavascriptEnabled"].as<bool>();
+  if (vm.count("isFontSubsettingEnabled")) isFontSubsettingEnabled_ = vm["isFontSubsettingEnabled"].as<bool>();
+  if (vm.count("sslAllowSelfSigned")) sslAllowSelfSigned_ = vm["sslAllowSelfSigned"].as<bool>();
+  if (vm.count("dpi")) dpi_ = vm["dpi"].as<std::string>();
+  if (vm.count("fontHeightRatio")) fontHeightRatio_ = vm["fontHeightRatio"].as<std::string>();
+  if (vm.count("defaultMediaType")) defaultMediaType_ = vm["defaultMediaType"].as<std::string>();
+  if (vm.count("defaultPaperSize")) defaultPaperSize_ = vm["defaultPaperSize"].as<std::string>();
+  if (vm.count("defaultPaperOrientation")) defaultPaperOrientation_ = vm["defaultPaperOrientation"].as<std::string>();
+  if (vm.count("defaultFont")) defaultFont_ = vm["defaultFont"].as<std::string>();
+  if (vm.count("allowedRemoteHosts")) allowedRemoteHosts_ = vm["allowedRemoteHosts"].as<std::vector<std::string>>() ;
 }
