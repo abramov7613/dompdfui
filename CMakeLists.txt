@@ -160,6 +160,39 @@ target_link_libraries(${PROJECT_NAME} PRIVATE
 
 
 # Define tests
+CPMAddPackage(
+    URI "gh:google/googletest@1.17.0"
+    OPTIONS
+        "INSTALL_GTEST OFF"
+        "BUILD_GMOCK OFF"
+)
+if (NOT googletest_ADDED)
+  message(FATAL_ERROR "Can't get googletest library")
+endif()
+include(GoogleTest)
+
+add_executable(cli_options_tests
+    test/cli_options_test.cpp
+)
+target_include_directories(cli_options_tests PRIVATE ${CMAKE_CURRENT_SOURCE_DIR})
+target_compile_features(cli_options_tests PRIVATE cxx_std_20)
+target_compile_definitions(cli_options_tests PRIVATE
+    DOMPDF_VERSION="${DOMPDF_VERSION}"
+    PHPCLI_VERSION="${PHPCLI_VERSION}"
+)
+target_link_libraries(cli_options_tests PRIVATE
+    GTest::gtest_main
+    Boost::program_options
+    Boost::nowide
+    Boost::predef
+    Boost::tokenizer
+    embedded_resources
+    cmake_timestamp
+    reproc++
+)
+
+gtest_discover_tests(cli_options_tests)
+
 add_test(NAME test1
     COMMAND
       ${PROJECT_NAME}
