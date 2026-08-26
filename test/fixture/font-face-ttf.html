@@ -1,0 +1,105 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+
+    <title>@font-face TTF Integration Test</title>
+
+    <style>
+        @page {
+            size: A4;
+            margin: 20mm;
+        }
+
+        @font-face {
+            font-family: "TestFont";
+            src: url("Ubuntu-M.ttf") format("truetype");
+            font-weight: 400;
+            font-style: normal;
+        }
+
+        @font-face {
+            font-family: "TestFont";
+            src: url("Ubuntu-M.ttf") format("truetype");
+            font-weight: 700;
+            font-style: normal;
+        }
+
+        body {
+            font-family: Arial, sans-serif;
+            font-size: 14px;
+            color: #222222;
+        }
+
+        .test-font {
+            font-family: "TestFont", sans-serif;
+        }
+
+        .normal {
+            font-weight: 400;
+        }
+
+        .bold {
+            font-weight: 700;
+        }
+
+        .large {
+            font-size: 28px;
+        }
+
+        .marker {
+            color: #990000;
+            font-weight: bold;
+        }
+
+        .box {
+            margin-top: 20px;
+            padding: 15px;
+            border: 2px solid #003366;
+        }
+    </style>
+</head>
+
+<body>
+
+<h1>@font-face TTF Test</h1>
+
+<p class="marker">
+    FONT_FACE_TTF_MARKER
+</p>
+
+<div class="box test-font normal">
+    <p>
+        This text must be rendered using the locally loaded TTF font.
+    </p>
+
+    <p>
+        Local font marker:
+        LOCAL_TTF_FONT_MARKER
+    </p>
+
+    <p>
+        The quick brown fox jumps over the lazy dog.
+    </p>
+
+    <p>
+        0123456789 !@#$%^&amp;*()
+    </p>
+
+    <p>
+        Кириллица: Привет, мир!
+    </p>
+</div>
+
+<div class="box test-font bold">
+    <p class="large">
+        TTF Bold Font
+    </p>
+
+    <p>
+        FONT_FACE_TTF_BOLD_MARKER
+    </p>
+</div>
+
+</body>
+</html>

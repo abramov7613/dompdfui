@@ -1,0 +1,87 @@
+<!DOCTYPE html>
+<!-- Checks basic CSS processing -->
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>CSS Test</title>
+
+    <style>
+        @page {
+            size: A4;
+            margin: 25mm;
+        }
+
+        body {
+            font-family: Arial, sans-serif;
+            background: white;
+            color: #222222;
+            font-size: 14px;
+        }
+
+        h1 {
+            color: #003366;
+            font-size: 28px;
+            border-bottom: 2px solid #003366;
+            padding-bottom: 8px;
+        }
+
+        .highlight {
+            background-color: #ffff00;
+            color: #000000;
+            padding: 10px;
+            border: 1px solid #ccaa00;
+        }
+
+        .box {
+            width: 300px;
+            height: 100px;
+            margin-top: 20px;
+            padding: 20px;
+            background-color: #e6f2ff;
+            border: 2px solid #0066cc;
+        }
+
+        .important {
+            font-weight: bold;
+            color: #cc0000;
+        }
+
+        ul {
+            margin-top: 20px;
+        }
+
+        li {
+            margin-bottom: 5px;
+        }
+    </style>
+</head>
+
+<body>
+
+<h1>CSS Integration Test</h1>
+
+<p>
+    This document verifies that CSS styles are applied during HTML to PDF
+    conversion.
+</p>
+
+<div class="highlight">
+    CSS_HIGHLIGHT_MARKER
+</div>
+
+<div class="box">
+    CSS_BOX_MARKER
+</div>
+
+<p class="important">
+    CSS_IMPORTANT_MARKER
+</p>
+
+<ul>
+    <li>CSS list item one</li>
+    <li>CSS list item two</li>
+    <li>CSS list item three</li>
+</ul>
+
+</body>
+</html>

@@ -1,0 +1,729 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Tables Integration Test</title>
+
+    <style>
+        @page {
+            size: A4;
+            margin: 15mm;
+        }
+
+        body {
+            font-family: Arial, sans-serif;
+            font-size: 12px;
+            color: #222222;
+            margin: 0;
+            padding: 0;
+        }
+
+        h1 {
+            font-size: 24px;
+            color: #003366;
+            margin-bottom: 25px;
+        }
+
+        h2 {
+            font-size: 18px;
+            color: #003366;
+            margin-top: 30px;
+            margin-bottom: 10px;
+        }
+
+        p {
+            margin: 6px 0;
+        }
+
+        .marker {
+            font-weight: bold;
+            color: #990000;
+        }
+
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            margin-top: 10px;
+            margin-bottom: 25px;
+        }
+
+        th,
+        td {
+            border: 1px solid #444444;
+            padding: 6px 8px;
+            text-align: left;
+            vertical-align: top;
+        }
+
+        th {
+            background-color: #e6eef7;
+            font-weight: bold;
+        }
+
+        .center {
+            text-align: center;
+        }
+
+        .right {
+            text-align: right;
+        }
+
+        .number {
+            text-align: right;
+            white-space: nowrap;
+        }
+
+        .total {
+            font-weight: bold;
+            background-color: #eeeeee;
+        }
+
+        .group-header {
+            background-color: #d9eaf7;
+            font-weight: bold;
+        }
+
+        .sub-header {
+            background-color: #f3f3f3;
+            font-weight: bold;
+        }
+
+        .warning {
+            background-color: #fff2cc;
+        }
+
+        .success {
+            background-color: #d9ead3;
+        }
+
+        .danger {
+            background-color: #f4cccc;
+        }
+
+        .long-text {
+            line-height: 1.5;
+        }
+
+        .nested-table {
+            width: 100%;
+            margin: 0;
+        }
+
+        .nested-table td {
+            border: 1px solid #999999;
+            padding: 4px;
+        }
+
+        .fixed-layout {
+            table-layout: fixed;
+        }
+
+        .fixed-layout .col-id {
+            width: 10%;
+        }
+
+        .fixed-layout .col-name {
+            width: 25%;
+        }
+
+        .fixed-layout .col-description {
+            width: 45%;
+        }
+
+        .fixed-layout .col-status {
+            width: 20%;
+        }
+    </style>
+</head>
+
+<body>
+
+<h1>Tables Integration Test</h1>
+
+<p>
+    This document contains simple and complex HTML tables for integration
+    testing of the HTML to PDF converter.
+</p>
+
+<p class="marker">
+    TABLES_INTEGRATION_TEST_MARKER
+</p>
+
+
+<!-- ========================================================= -->
+<!-- 1. SIMPLE TABLE                                           -->
+<!-- ========================================================= -->
+
+<h2>1. Simple Table</h2>
+
+<p>
+    A basic table with a header row and three data rows.
+</p>
+
+<table>
+    <thead>
+        <tr>
+            <th>ID</th>
+            <th>Name</th>
+            <th>Category</th>
+            <th>Price</th>
+        </tr>
+    </thead>
+
+    <tbody>
+        <tr>
+            <td>1</td>
+            <td>Apple</td>
+            <td>Fruit</td>
+            <td class="number">1.20</td>
+        </tr>
+
+        <tr>
+            <td>2</td>
+            <td>Banana</td>
+            <td>Fruit</td>
+            <td class="number">0.80</td>
+        </tr>
+
+        <tr>
+            <td>3</td>
+            <td>Carrot</td>
+            <td>Vegetable</td>
+            <td class="number">1.50</td>
+        </tr>
+    </tbody>
+</table>
+
+
+<!-- ========================================================= -->
+<!-- 2. TABLE WITH COLSPAN                                      -->
+<!-- ========================================================= -->
+
+<h2>2. Colspan Table</h2>
+
+<p>
+    This table verifies horizontal cell spanning.
+</p>
+
+<table>
+    <thead>
+        <tr>
+            <th colspan="4" class="center">
+                Product Information
+            </th>
+        </tr>
+
+        <tr>
+            <th>ID</th>
+            <th>Name</th>
+            <th>Category</th>
+            <th>Price</th>
+        </tr>
+    </thead>
+
+    <tbody>
+        <tr>
+            <td>101</td>
+            <td>Keyboard</td>
+            <td>Hardware</td>
+            <td class="number">49.99</td>
+        </tr>
+
+        <tr>
+            <td>102</td>
+            <td>Mouse</td>
+            <td>Hardware</td>
+            <td class="number">29.99</td>
+        </tr>
+
+        <tr>
+            <td colspan="3" class="total">
+                Total
+            </td>
+
+            <td class="number total">
+                79.98
+            </td>
+        </tr>
+    </tbody>
+</table>
+
+
+<!-- ========================================================= -->
+<!-- 3. TABLE WITH ROWSPAN                                      -->
+<!-- ========================================================= -->
+
+<h2>3. Rowspan Table</h2>
+
+<p>
+    This table verifies vertical cell spanning.
+</p>
+
+<table>
+    <thead>
+        <tr>
+            <th>Department</th>
+            <th>Employee</th>
+            <th>Position</th>
+            <th>Salary</th>
+        </tr>
+    </thead>
+
+    <tbody>
+        <tr>
+            <td rowspan="3" class="group-header">
+                Engineering
+            </td>
+
+            <td>Alice Johnson</td>
+            <td>Senior Engineer</td>
+            <td class="number">85000</td>
+        </tr>
+
+        <tr>
+            <td>Bob Smith</td>
+            <td>Software Engineer</td>
+            <td class="number">72000</td>
+        </tr>
+
+        <tr>
+            <td>Carol Williams</td>
+            <td>QA Engineer</td>
+            <td class="number">68000</td>
+        </tr>
+
+        <tr>
+            <td rowspan="2" class="group-header">
+                Marketing
+            </td>
+
+            <td>David Brown</td>
+            <td>Marketing Manager</td>
+            <td class="number">76000</td>
+        </tr>
+
+        <tr>
+            <td>Eva Davis</td>
+            <td>Marketing Specialist</td>
+            <td class="number">61000</td>
+        </tr>
+    </tbody>
+</table>
+
+
+<!-- ========================================================= -->
+<!-- 4. COLSPAN + ROWSPAN                                      -->
+<!-- ========================================================= -->
+
+<h2>4. Colspan and Rowspan Combined</h2>
+
+<p>
+    This table combines horizontal and vertical cell spanning.
+</p>
+
+<table>
+    <thead>
+        <tr>
+            <th rowspan="2">Product</th>
+            <th colspan="3" class="center">Quarterly Sales</th>
+            <th rowspan="2">Annual Total</th>
+        </tr>
+
+        <tr>
+            <th>Q1</th>
+            <th>Q2</th>
+            <th>Q3</th>
+        </tr>
+    </thead>
+
+    <tbody>
+        <tr>
+            <td>Product A</td>
+            <td class="number">120</td>
+            <td class="number">150</td>
+            <td class="number">180</td>
+            <td class="number">450</td>
+        </tr>
+
+        <tr>
+            <td>Product B</td>
+            <td class="number">90</td>
+            <td class="number">110</td>
+            <td class="number">140</td>
+            <td class="number">340</td>
+        </tr>
+
+        <tr>
+            <td colspan="4" class="total">
+                Combined Total
+            </td>
+
+            <td class="number total">
+                790
+            </td>
+        </tr>
+    </tbody>
+</table>
+
+
+<!-- ========================================================= -->
+<!-- 5. TABLE WITH LONG TEXT                                   -->
+<!-- ========================================================= -->
+
+<h2>5. Long Text Table</h2>
+
+<p>
+    This table verifies text wrapping inside cells.
+</p>
+
+<table class="fixed-layout">
+    <thead>
+        <tr>
+            <th class="col-id">ID</th>
+            <th class="col-name">Name</th>
+            <th class="col-description">Description</th>
+            <th class="col-status">Status</th>
+        </tr>
+    </thead>
+
+    <tbody>
+        <tr>
+            <td>001</td>
+
+            <td>HTML Converter</td>
+
+            <td class="long-text">
+                This is a deliberately long description used to verify
+                automatic text wrapping inside a table cell. The text
+                should remain inside the boundaries of the cell and
+                should not overlap neighboring columns or disappear
+                outside the printable page area.
+            </td>
+
+            <td class="success">
+                Passed
+            </td>
+        </tr>
+
+        <tr>
+            <td>002</td>
+
+            <td>PDF Renderer</td>
+
+            <td class="long-text">
+                The PDF renderer must correctly calculate the dimensions
+                of table rows containing multiple lines of text. Row
+                height should expand according to the content without
+                breaking the table layout.
+            </td>
+
+            <td class="warning">
+                Warning
+            </td>
+        </tr>
+
+        <tr>
+            <td>003</td>
+
+            <td>Resource Loader</td>
+
+            <td class="long-text">
+                Relative resources such as CSS files and images must be
+                resolved correctly even when the HTML document is loaded
+                from a nested directory.
+            </td>
+
+            <td class="danger">
+                Failed
+            </td>
+        </tr>
+    </tbody>
+</table>
+
+
+<!-- ========================================================= -->
+<!-- 6. GROUPED TABLE                                          -->
+<!-- ========================================================= -->
+
+<h2>6. Grouped Table</h2>
+
+<p>
+    This table uses multiple logical row groups.
+</p>
+
+<table>
+    <thead>
+        <tr>
+            <th>Region</th>
+            <th>Country</th>
+            <th>City</th>
+            <th>Population</th>
+        </tr>
+    </thead>
+
+    <tbody>
+        <tr class="group-header">
+            <td colspan="4">
+                Europe
+            </td>
+        </tr>
+
+        <tr>
+            <td>Europe</td>
+            <td>Germany</td>
+            <td>Berlin</td>
+            <td class="number">3,700,000</td>
+        </tr>
+
+        <tr>
+            <td>Europe</td>
+            <td>France</td>
+            <td>Paris</td>
+            <td class="number">2,100,000</td>
+        </tr>
+
+        <tr>
+            <td>Europe</td>
+            <td>Italy</td>
+            <td>Rome</td>
+            <td class="number">2,800,000</td>
+        </tr>
+
+        <tr class="group-header">
+            <td colspan="4">
+                North America
+            </td>
+        </tr>
+
+        <tr>
+            <td>North America</td>
+            <td>United States</td>
+            <td>New York</td>
+            <td class="number">8,300,000</td>
+        </tr>
+
+        <tr>
+            <td>North America</td>
+            <td>Canada</td>
+            <td>Toronto</td>
+            <td class="number">2,900,000</td>
+        </tr>
+    </tbody>
+</table>
+
+
+<!-- ========================================================= -->
+<!-- 7. NESTED TABLE                                           -->
+<!-- ========================================================= -->
+
+<h2>7. Nested Table</h2>
+
+<p>
+    This section verifies tables nested inside table cells.
+</p>
+
+<table>
+    <thead>
+        <tr>
+            <th>Order ID</th>
+            <th>Customer</th>
+            <th>Order Details</th>
+            <th>Total</th>
+        </tr>
+    </thead>
+
+    <tbody>
+        <tr>
+            <td>ORD-001</td>
+
+            <td>John Smith</td>
+
+            <td>
+                <table class="nested-table">
+                    <thead>
+                        <tr>
+                            <th>Item</th>
+                            <th>Qty</th>
+                        </tr>
+                    </thead>
+
+                    <tbody>
+                        <tr>
+                            <td>Keyboard</td>
+                            <td class="center">1</td>
+                        </tr>
+
+                        <tr>
+                            <td>Mouse</td>
+                            <td class="center">2</td>
+                        </tr>
+                    </tbody>
+                </table>
+            </td>
+
+            <td class="number">
+                109.97
+            </td>
+        </tr>
+
+        <tr>
+            <td>ORD-002</td>
+
+            <td>Jane Doe</td>
+
+            <td>
+                <table class="nested-table">
+                    <thead>
+                        <tr>
+                            <th>Item</th>
+                            <th>Qty</th>
+                        </tr>
+                    </thead>
+
+                    <tbody>
+                        <tr>
+                            <td>Monitor</td>
+                            <td class="center">2</td>
+                        </tr>
+
+                        <tr>
+                            <td>HDMI Cable</td>
+                            <td class="center">2</td>
+                        </tr>
+                    </tbody>
+                </table>
+            </td>
+
+            <td class="number">
+                459.98
+            </td>
+        </tr>
+    </tbody>
+</table>
+
+
+<!-- ========================================================= -->
+<!-- 8. TABLE WITH THEAD/TBODY/TFOOT                           -->
+<!-- ========================================================= -->
+
+<h2>8. Table with Header, Body and Footer</h2>
+
+<p>
+    This table verifies thead, tbody and tfoot handling.
+</p>
+
+<table>
+    <thead>
+        <tr>
+            <th>Item</th>
+            <th>Quantity</th>
+            <th>Unit Price</th>
+            <th>Total</th>
+        </tr>
+    </thead>
+
+    <tbody>
+        <tr>
+            <td>Item A</td>
+            <td class="center">2</td>
+            <td class="number">10.00</td>
+            <td class="number">20.00</td>
+        </tr>
+
+        <tr>
+            <td>Item B</td>
+            <td class="center">3</td>
+            <td class="number">15.00</td>
+            <td class="number">45.00</td>
+        </tr>
+
+        <tr>
+            <td>Item C</td>
+            <td class="center">1</td>
+            <td class="number">25.00</td>
+            <td class="number">25.00</td>
+        </tr>
+    </tbody>
+
+    <tfoot>
+        <tr>
+            <td colspan="3" class="total">
+                Grand Total
+            </td>
+
+            <td class="number total">
+                90.00
+            </td>
+        </tr>
+    </tfoot>
+</table>
+
+
+<!-- ========================================================= -->
+<!-- 9. MANY COLUMNS                                           -->
+<!-- ========================================================= -->
+
+<h2>9. Wide Table</h2>
+
+<p>
+    This table intentionally contains many columns to test horizontal
+    layout and page boundaries.
+</p>
+
+<table class="fixed-layout">
+    <thead>
+        <tr>
+            <th>ID</th>
+            <th>Name</th>
+            <th>Type</th>
+            <th>Status</th>
+            <th>Owner</th>
+            <th>Version</th>
+            <th>Created</th>
+            <th>Updated</th>
+        </tr>
+    </thead>
+
+    <tbody>
+        <tr>
+            <td>1</td>
+            <td>Converter</td>
+            <td>Application</td>
+            <td>Active</td>
+            <td>Alice</td>
+            <td>1.0</td>
+            <td>2026-01-10</td>
+            <td>2026-08-01</td>
+        </tr>
+
+        <tr>
+            <td>2</td>
+            <td>Renderer</td>
+            <td>Library</td>
+            <td>Active</td>
+            <td>Bob</td>
+            <td>2.4</td>
+            <td>2026-02-15</td>
+            <td>2026-08-05</td>
+        </tr>
+
+        <tr>
+            <td>3</td>
+            <td>Resource Loader</td>
+            <td>Component</td>
+            <td>Testing</td>
+            <td>Carol</td>
+            <td>0.9</td>
+            <td>2026-03-20</td>
+            <td>2026-08-10</td>
+        </tr>
+    </tbody>
+</table>
+
+
+<p class="marker">
+    TABLES_TEST_END_MARKER
+</p>
+
+</body>
+</html>

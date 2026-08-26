@@ -21,6 +21,7 @@ endif()
 # Setup project options
 project(dompdfui VERSION ${DOMPDFUI_VERSION})
 set(BUILD_SHARED_LIBS OFF)
+option(BUILD_TESTS "build tests" ON)
 set(DOMPDF_VERSION "3.1.0" CACHE STRING "")
 set(DOMPDF_RELEASE_URL "https://github.com/dompdf/dompdf/releases/download/v3.1.0/dompdf-3.1.0.zip" CACHE STRING "")
 set(DOMPDF_RELEASE_HASH "cafb29ad27308660e1650ff54c9c4ffc67a289afb89a59d754d6649c58bd7ad1" CACHE STRING "")
@@ -31,7 +32,6 @@ set(PHPCLI_RELEASE_LINUX_EXE_HASH "85b3876353dc47b278e68bb764fa6280deaf08b47e328
 set(PHPCLI_RELEASE_WINDOWS_URL "https://dl.static-php.dev/static-php-cli/windows/spc-max/php-8.0.30-cli-win.zip" CACHE STRING "")
 set(PHPCLI_RELEASE_WINDOWS_AR_HASH "67c98a95790d2dd9f79b051c2b6cab0cf9bb4d4cc0b4c5401c991bc99c99ac82" CACHE STRING "")
 set(PHPCLI_RELEASE_WINDOWS_EXE_HASH "03d692f3ce76a36641d7395c44ad40af62f3a2ce4d16fb4a61314a4120a8914f" CACHE STRING "")
-enable_testing()
 
 
 # Check Architecture
@@ -160,51 +160,100 @@ target_link_libraries(${PROJECT_NAME} PRIVATE
 
 
 # Define tests
-CPMAddPackage(
-    URI "gh:google/googletest@1.17.0"
-    OPTIONS
-        "INSTALL_GTEST OFF"
-        "BUILD_GMOCK OFF"
-)
-if (NOT googletest_ADDED)
-  message(FATAL_ERROR "Can't get googletest library")
+if (BUILD_TESTS)
+  enable_testing()
+
+  function(check_executable_for_version result executable)
+    execute_process(
+      COMMAND ${executable} -v
+      RESULT_VARIABLE result_variable
+      OUTPUT_VARIABLE output_variable
+      ERROR_VARIABLE output_variable
+      OUTPUT_STRIP_TRAILING_WHITESPACE
+      ERROR_STRIP_TRAILING_WHITESPACE
+    )
+    if(result_variable STREQUAL "0")
+      if(output_variable MATCHES "^.+version ([0-9]+\.[0-9]+\.?[0-9]*).+$")
+        return()
+      endif()
+    endif()
+    set(${result} FALSE PARENT_SCOPE)
+  endfunction()
+  find_program(PDFINFO_EXECUTABLE NAMES pdfinfo VALIDATOR check_executable_for_version)
+  if (NOT PDFINFO_EXECUTABLE)
+    message(FATAL_ERROR "pdfinfo not found, dasable tests or install poppler tools")
+  endif()
+  find_program(PDFTOTEXT_EXECUTABLE NAMES pdftotext VALIDATOR check_executable_for_version)
+  if (NOT PDFTOTEXT_EXECUTABLE)
+    message(FATAL_ERROR "pdftotext not found, dasable tests or install poppler tools")
+  endif()
+
+  CPMAddPackage(
+      URI "gh:google/googletest@1.17.0"
+      OPTIONS
+          "INSTALL_GTEST OFF"
+          "BUILD_GMOCK OFF"
+  )
+  if (NOT googletest_ADDED)
+    message(FATAL_ERROR "Can't get googletest library")
+  endif()
+  include(GoogleTest)
+
+  add_executable(cli_options_tests
+      test/cli_options_test.cpp
+  )
+  target_include_directories(cli_options_tests PRIVATE ${CMAKE_CURRENT_SOURCE_DIR})
+  target_compile_features(cli_options_tests PRIVATE cxx_std_20)
+  target_compile_definitions(cli_options_tests PRIVATE
+      DOMPDF_VERSION="${DOMPDF_VERSION}"
+      PHPCLI_VERSION="${PHPCLI_VERSION}"
+  )
+  target_link_libraries(cli_options_tests PRIVATE
+      GTest::gtest_main
+      Boost::program_options
+      Boost::nowide
+      Boost::predef
+      Boost::tokenizer
+      embedded_resources
+      cmake_timestamp
+      reproc++
+  )
+  gtest_discover_tests(cli_options_tests)
+
+  add_executable(integration_tests
+      test/integration_tests.cpp
+  )
+  target_compile_features(integration_tests PRIVATE cxx_std_20)
+  target_compile_definitions(integration_tests PRIVATE
+      PDFINFO_EXECUTABLE="${PDFINFO_EXECUTABLE}"
+      PDFTOTEXT_EXECUTABLE="${PDFTOTEXT_EXECUTABLE}"
+      DOMPDFUI_EXECUTABLE="$<TARGET_FILE:${PROJECT_NAME}>"
+      DOMPDFUI_TEST_SOURCE_DIR="${CMAKE_CURRENT_SOURCE_DIR}/test"
+      DOMPDFUI_TEST_OUTPUT_DIR="${CMAKE_CURRENT_BINARY_DIR}/test_results"
+  )
+  target_link_libraries(integration_tests PRIVATE
+      GTest::gtest_main
+      Boost::nowide
+      reproc++
+  )
+  gtest_discover_tests(integration_tests)
+
+
+#[[
+  add_test(NAME test1
+      COMMAND
+        ${PROJECT_NAME}
+        --isRemoteEnabled=1
+        --force-out
+        "${CMAKE_CURRENT_SOURCE_DIR}/test/test1.html"
+        .
+  )
+  add_test(NAME test2
+      COMMAND
+        ${PROJECT_NAME}
+        --force-out
+        "${CMAKE_CURRENT_SOURCE_DIR}/test/test2.html"
+        .
+  )
+]]
 endif()
-include(GoogleTest)
-
-add_executable(cli_options_tests
-    test/cli_options_test.cpp
-)
-target_include_directories(cli_options_tests PRIVATE ${CMAKE_CURRENT_SOURCE_DIR})
-target_compile_features(cli_options_tests PRIVATE cxx_std_20)
-target_compile_definitions(cli_options_tests PRIVATE
-    DOMPDF_VERSION="${DOMPDF_VERSION}"
-    PHPCLI_VERSION="${PHPCLI_VERSION}"
-)
-target_link_libraries(cli_options_tests PRIVATE
-    GTest::gtest_main
-    Boost::program_options
-    Boost::nowide
-    Boost::predef
-    Boost::tokenizer
-    embedded_resources
-    cmake_timestamp
-    reproc++
-)
-
-gtest_discover_tests(cli_options_tests)
-
-add_test(NAME test1
-    COMMAND
-      ${PROJECT_NAME}
-      --isRemoteEnabled=1
-      --force-out
-      "${CMAKE_CURRENT_SOURCE_DIR}/test/test1.html"
-      .
-)
-add_test(NAME test2
-    COMMAND
-      ${PROJECT_NAME}
-      --force-out
-      "${CMAKE_CURRENT_SOURCE_DIR}/test/test2.html"
-      .
-)

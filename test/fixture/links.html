@@ -1,0 +1,62 @@
+<!DOCTYPE html>
+<!-- Checks links and their text -->
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Links Test</title>
+
+    <style>
+        @page {
+            size: A4;
+            margin: 20mm;
+        }
+
+        body {
+            font-family: sans-serif;
+            font-size: 14px;
+        }
+
+        a {
+            color: #0066cc;
+        }
+
+        .link-block {
+            margin: 20px 0;
+        }
+    </style>
+</head>
+
+<body>
+
+<h1>Links Integration Test</h1>
+
+<p>
+    This document verifies HTML links.
+</p>
+
+<div class="link-block">
+    <a href="https://example.com">
+        EXTERNAL_LINK_MARKER
+    </a>
+</div>
+
+<div class="link-block">
+    <a href="#internal-section">
+        INTERNAL_LINK_MARKER
+    </a>
+</div>
+
+<div style="height: 500px;">
+    Spacer content.
+</div>
+
+<section id="internal-section">
+    <h2>Internal Section</h2>
+
+    <p>
+        INTERNAL_LINK_TARGET_MARKER
+    </p>
+</section>
+
+</body>
+</html>

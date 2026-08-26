@@ -1,0 +1,63 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Nested Resources Integration Test</title>
+
+    <style>
+        @page {
+            size: A4;
+            margin: 20mm;
+        }
+
+        body {
+            font-family: sans-serif;
+            font-size: 14px;
+        }
+
+        .image-container {
+            margin-top: 20px;
+            padding: 15px;
+            border: 2px solid #333333;
+        }
+
+        .marker {
+            margin-top: 20px;
+            font-weight: bold;
+            color: #003366;
+        }
+
+        img {
+            width: 256px;
+            height: 256px;
+        }
+    </style>
+</head>
+
+<body>
+
+<h1>Nested Resources Test</h1>
+
+<p>
+    This document loads an image from a nested assets directory.
+</p>
+
+<p class="marker">
+    NESTED_RESOURCE_MARKER
+</p>
+
+<div class="image-container">
+    <img
+        src="assets/image.png"
+        alt="Nested resource integration test image"
+    >
+</div>
+
+<p>
+    The image path is relative to this HTML document:
+</p>
+
+<pre>assets/image.png</pre>
+
+</body>
+</html>

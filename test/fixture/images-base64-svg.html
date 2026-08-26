@@ -1,0 +1,64 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Base64 Image Test</title>
+
+    <style>
+        @page {
+            size: A4;
+            margin: 20mm;
+        }
+
+        body {
+            font-family: sans-serif;
+            font-size: 14px;
+        }
+
+        .image-container {
+            margin-top: 20px;
+            padding: 20px;
+            border: 2px solid #333333;
+            width: 300px;
+        }
+
+        .image-container img {
+            display: block;
+            width: 256px;
+            height: 256px;
+        }
+
+        .marker {
+            margin-top: 20px;
+            font-weight: bold;
+            color: #003366;
+        }
+    </style>
+</head>
+
+<body>
+
+<h1>Base64 Image Integration Test</h1>
+
+<p>
+    This document contains an image embedded directly into the HTML
+    document using a Base64-encoded data URI.
+</p>
+
+<p class="marker">
+    BASE64_IMAGE_MARKER
+</p>
+
+<div class="image-container">
+    <img
+        src="data:image/svg+xml;base64,PHN2ZyB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmciIHdpZHRoPSIyNTYiIGhlaWdodD0iMjU2IiB2aWV3Qm94PSIwIDAgMjU2IDI1NiI+PHJlY3QgeD0iMCIgeT0iMCIgd2lkdGg9IjEyOCIgaGVpZ2h0PSIyNTYiIGZpbGw9IiNmZjAwMDAiLz48cmVjdCB4PSIxMjgiIHk9IjAiIHdpZHRoPSIxMjgiIGhlaWdodD0iMjU2IiBmaWxsPSIjMDAwMGZmIi8+PHBhdGggZD0iTTAgMTI4SDI1Nk0xMjggME0xMjggMjU2IiBzdHJva2U9IndoaXRlIiBzdHJva2Utd2lkdGg9IjQiLz48L3N2Zz4="
+        alt="Base64 embedded integration test image"
+    >
+</div>
+
+<p>
+    The image above must be rendered from the embedded Base64 data.
+</p>
+
+</body>
+</html>

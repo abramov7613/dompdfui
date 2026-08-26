@@ -9,6 +9,7 @@
 #include <iomanip>
 #include <ctime>
 #include <random>
+#include <utility>
 #include <boost/nowide/args.hpp>
 #include <boost/nowide/cstdlib.hpp>
 #include <boost/nowide/fstream.hpp>
@@ -271,12 +272,28 @@ void run_php_script(const std::string& name, const std::string& body, const Appl
 
 fs::path temp_path()
 {
-  static std::random_device rd;
-  static std::mt19937 gen(rd());
-  static std::uniform_int_distribution<> distrib(97, 122);
+  static auto randomInt = [](int min, int max) {
+      if (min > max) std::swap(min, max);
+      static std::random_device rd;
+      static std::mt19937 gen(rd());
+      return std::uniform_int_distribution<int>(min, max)(gen);
+  };
   static std::string x;
   if (x.empty()) {
-    for (int i{}; i<24; ++i) x += static_cast<char>(distrib(gen)) ;
+    for (int i{}; i<24; ++i) {
+      switch(randomInt(1,5)) {
+        case 1:
+        case 2:
+          x += static_cast<char>(randomInt(97,122)) ;
+          break;
+        case 3:
+        case 4:
+          x += static_cast<char>(randomInt(65,90)) ;
+          break;
+        default:
+          x += static_cast<char>(randomInt(48,57)) ;
+      }
+    }
     x = "dompdfui_"  + x ;
   }
   return fs::temp_directory_path() / x ;
