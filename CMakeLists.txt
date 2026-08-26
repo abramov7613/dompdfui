@@ -22,9 +22,9 @@ endif()
 project(dompdfui VERSION ${DOMPDFUI_VERSION})
 set(BUILD_SHARED_LIBS OFF)
 option(BUILD_TESTS "build tests" ON)
-set(DOMPDF_VERSION "3.1.0" CACHE STRING "")
-set(DOMPDF_RELEASE_URL "https://github.com/dompdf/dompdf/releases/download/v3.1.0/dompdf-3.1.0.zip" CACHE STRING "")
-set(DOMPDF_RELEASE_HASH "cafb29ad27308660e1650ff54c9c4ffc67a289afb89a59d754d6649c58bd7ad1" CACHE STRING "")
+set(DOMPDF_VERSION "3.1.6" CACHE STRING "")
+set(DOMPDF_RELEASE_URL "https://github.com/dompdf/dompdf/releases/download/v3.1.6/dompdf-3.1.6.zip" CACHE STRING "")
+set(DOMPDF_RELEASE_HASH "05df8ee4907325ed2e09a139de9784325f761b43a049297155499270163ac94d" CACHE STRING "")
 set(PHPCLI_VERSION "8.0.30" CACHE STRING "")
 set(PHPCLI_RELEASE_LINUX_URL "https://dl.static-php.dev/static-php-cli/common/php-8.0.30-cli-linux-x86_64.tar.gz" CACHE STRING "")
 set(PHPCLI_RELEASE_LINUX_AR_HASH "1a5b1d5e60bca9e0c06557640f878e88bd52ac4eb28e8a118103867b084e8ff8" CACHE STRING "")
@@ -68,7 +68,7 @@ set(Boost_USE_STATIC_LIBS        ON)  # only find static libs
 set(Boost_USE_DEBUG_LIBS        OFF)  # ignore debug libs and
 set(Boost_USE_RELEASE_LIBS       ON)  # only find release libs
 set(Boost_USE_STATIC_RUNTIME     ON)
-find_package(Boost 1.86.0 CONFIG REQUIRED COMPONENTS program_options nowide tokenizer predef)
+find_package(Boost 1.92 CONFIG REQUIRED COMPONENTS program_options nowide tokenizer predef)
 
 
 # Get timestamp library
@@ -78,6 +78,7 @@ if (NOT cmake_timestamp_ADDED)
 endif()
 
 
+# Get reproc library
 CPMAddPackage(
   URI "gh:DaanDeMeyer/reproc@14.2.7"
   OPTIONS "REPROC++ ON"
@@ -237,23 +238,4 @@ if (BUILD_TESTS)
       reproc++
   )
   gtest_discover_tests(integration_tests)
-
-
-#[[
-  add_test(NAME test1
-      COMMAND
-        ${PROJECT_NAME}
-        --isRemoteEnabled=1
-        --force-out
-        "${CMAKE_CURRENT_SOURCE_DIR}/test/test1.html"
-        .
-  )
-  add_test(NAME test2
-      COMMAND
-        ${PROJECT_NAME}
-        --force-out
-        "${CMAKE_CURRENT_SOURCE_DIR}/test/test2.html"
-        .
-  )
-]]
 endif()
