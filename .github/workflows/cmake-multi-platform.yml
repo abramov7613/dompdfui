@@ -31,7 +31,7 @@ jobs:
       id: strings
       shell: bash
       run: |
-        echo "build-output-dir=${{ runner.os == 'Windows' && '${{ github.workspace }}\\build' || '${{ github.workspace }}/build' }}" >> "$GITHUB_OUTPUT"
+        echo "build-output-dir=${{ runner.os == 'Windows' && '${{ github.workspace }}\build' || '${{ github.workspace }}/build' }}" >> "$GITHUB_OUTPUT"
 
     - name: Restore Boost from Cache
       id: restore-cache-Boost
