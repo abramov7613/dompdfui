@@ -22,6 +22,7 @@ jobs:
         os: [ubuntu-latest, windows-latest]
         build_type: [Release]
         c_compiler: [gcc]
+        cpp_compiler: [g++]
 
     steps:
     - uses: actions/checkout@v4
@@ -31,7 +32,6 @@ jobs:
       shell: bash
       run: |
         echo "build-output-dir=${{ github.workspace }}/build" >> "$GITHUB_OUTPUT"
-        cd ${{ github.workspace }} && mkdir build
 
     - name: Restore Boost from Cache
       id: restore-cache-Boost
@@ -63,11 +63,11 @@ jobs:
       shell: bash
       run: |
         cd ${{ steps.strings.outputs.build-output-dir }}/boost-${{env.BOOST_VER}}
-        cmake --build build --target install
+        sudo cmake --build build --target install
 
     - name: ubuntu install poppler
       if: runner.os == 'Linux'
-      run: apt install -y poppler-utils
+      run: sudo apt install -y poppler-utils
 
     - name: windows install poppler
       if: runner.os == 'Windows'
