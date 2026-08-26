@@ -78,6 +78,7 @@ jobs:
         echo "${{ steps.strings.outputs.build-output-dir }}/poppler-26.02.0/Library/bin" >> $GITHUB_PATH
 
     - name: Configure CMake
+      working-directory: ${{ github.workspace }}
       run: >
         cmake -B ${{ steps.strings.outputs.build-output-dir }}
         -DCMAKE_CXX_COMPILER=${{ matrix.cpp_compiler }}
@@ -86,6 +87,7 @@ jobs:
         -S ${{ github.workspace }}
 
     - name: Build
+      working-directory: ${{ github.workspace }}
       run: cmake --build ${{ steps.strings.outputs.build-output-dir }} --config ${{ matrix.build_type }}
 
     - name: Test
