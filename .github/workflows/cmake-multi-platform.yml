@@ -31,8 +31,9 @@ jobs:
       id: strings
       shell: bash
       run: |
-        echo "MY_BUILD_DIR=${{ runner.os == 'Windows' && '${{ github.workspace }}\\build' || '${{ github.workspace }}/build' }}" >> $GITHUB_ENV
-        echo "build-output-dir=$MY_BUILD_DIR" >> "$GITHUB_OUTPUT"
+        echo "VAR1=${{ github.workspace }}"
+        echo "VAR2=${{ runner.os == 'Windows' && '$VAR1\build' || '$VAR1/build' }}"
+        echo "build-output-dir=$VAR2" >> "$GITHUB_OUTPUT"
 
     - name: Restore Boost from Cache
       id: restore-cache-Boost
@@ -76,7 +77,7 @@ jobs:
       run: |
         wget https://github.com/oschwartz10612/poppler-windows/releases/download/v26.02.0-0/Release-26.02.0-0.zip
         unzip -qq Release-26.02.0-0.zip
-        echo "${{ steps.strings.outputs.build-output-dir }}/poppler-26.02.0/Library/bin" >> $GITHUB_PATH
+        echo "${{ steps.strings.outputs.build-output-dir }}\poppler-26.02.0\Library\bin" >> $GITHUB_PATH
 
     - name: Configure CMake
       working-directory: ${{ github.workspace }}
