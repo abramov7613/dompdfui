@@ -31,6 +31,8 @@ jobs:
       id: strings
       shell: bash
       run: |
+        cd ${{ github.workspace }}
+        mkdir build
         echo "build-output-dir=${{ github.workspace }}/build" >> "$GITHUB_OUTPUT"
 
     - name: Restore Boost from Cache
