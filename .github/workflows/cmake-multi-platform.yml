@@ -31,9 +31,9 @@ jobs:
       id: strings
       shell: bash
       run: |
-        echo "VAR1=${{ github.workspace }}"
-        echo "VAR2=${{ runner.os == 'Windows' && '$VAR1\build' || '$VAR1/build' }}"
-        echo "build-output-dir=$VAR2" >> "$GITHUB_OUTPUT"
+        echo "MY_W_SPACE=${{ github.workspace }}" >> $GITHUB_ENV
+        echo "MY_B_SPACE=${{ runner.os == 'Windows' && '$MY_W_SPACE\build' || '$MY_W_SPACE/build' }}" >> $GITHUB_ENV
+        echo "build-output-dir=$MY_B_SPACE" >> "$GITHUB_OUTPUT"
 
     - name: Restore Boost from Cache
       id: restore-cache-Boost
