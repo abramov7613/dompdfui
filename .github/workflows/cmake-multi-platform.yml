@@ -28,15 +28,11 @@ jobs:
     - uses: actions/checkout@v4
 
     - name: Set reusable strings
-      if: runner.os == 'Linux'
       id: strings
-      run: echo "build-output-dir=${{ github.workspace }}/build" >> "$GITHUB_OUTPUT"
-
-    - name: Set reusable strings
-      if: runner.os == 'Windows'
       shell: bash
-      id: strings
-      run: echo "build-output-dir=${{ github.workspace }}\build" >> "$GITHUB_OUTPUT"
+      run: |
+        echo "MY_BUILD_DIR=${{ runner.os == 'Windows' && '${{ github.workspace }}\\build' || '${{ github.workspace }}/build' }}" >> $GITHUB_ENV
+        echo "build-output-dir=$MY_BUILD_DIR" >> "$GITHUB_OUTPUT"
 
     - name: Restore Boost from Cache
       id: restore-cache-Boost
