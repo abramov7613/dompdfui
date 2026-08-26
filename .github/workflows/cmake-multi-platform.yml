@@ -31,8 +31,6 @@ jobs:
       id: strings
       shell: bash
       run: |
-        cd ${{ github.workspace }}
-        mkdir build
         echo "build-output-dir=${{ github.workspace }}/build" >> "$GITHUB_OUTPUT"
 
     - name: Restore Boost from Cache
@@ -45,8 +43,8 @@ jobs:
     - name: Build Boost
       shell: bash
       if: steps.restore-cache-Boost.outputs.cache-hit != 'true'
+      working-directory: ${{ steps.strings.outputs.build-output-dir }}
       run: |
-        cd ${{ steps.strings.outputs.build-output-dir }}
         wget https://github.com/boostorg/boost/releases/download/boost-${{env.BOOST_VER}}/boost-${{env.BOOST_VER}}-cmake.tar.xz
         tar -xJf boost-${{env.BOOST_VER}}-cmake.tar.xz
         cd boost-${{env.BOOST_VER}}
@@ -63,9 +61,8 @@ jobs:
 
     - name: Install Boost
       shell: bash
-      run: |
-        cd ${{ steps.strings.outputs.build-output-dir }}/boost-${{env.BOOST_VER}}
-        sudo cmake --build build --target install
+      working-directory: ${{ steps.strings.outputs.build-output-dir }}/boost-${{env.BOOST_VER}}
+      run: sudo cmake --build build --target install
 
     - name: ubuntu install poppler
       if: runner.os == 'Linux'
@@ -74,8 +71,8 @@ jobs:
     - name: windows install poppler
       if: runner.os == 'Windows'
       shell: bash
+      working-directory: ${{ steps.strings.outputs.build-output-dir }}
       run: |
-        cd ${{ steps.strings.outputs.build-output-dir }}
         wget https://github.com/oschwartz10612/poppler-windows/releases/download/v26.02.0-0/Release-26.02.0-0.zip
         unzip -qq Release-26.02.0-0.zip
         echo "${{ steps.strings.outputs.build-output-dir }}/poppler-26.02.0/Library/bin" >> $GITHUB_PATH
