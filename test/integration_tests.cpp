@@ -226,15 +226,15 @@ protected:
       if (isRemoteEnabled) arguments.insert(arguments.begin(), "--isRemoteEnabled=1");
       if (sslAllowSelfSigned) arguments.insert(arguments.begin(), "--sslAllowSelfSigned=1");
 
-      auto [result, stdout, stderr] = run_program(executable_.string(), arguments);
+      auto [result_, stdout_, stderr_] = run_program(executable_.string(), arguments);
 
-      EXPECT_EQ(result, 0)
+      EXPECT_EQ(result_, 0)
           << "dompdfui failed with exit code "
-          << result
+          << result_
           << "\n"
-          << stdout
+          << stdout_
           << "\n"
-          << stderr ;
+          << stderr_ ;
 
       const fs::path pdf =
           pdfoutdir_ /
