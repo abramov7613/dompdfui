@@ -1,5 +1,3 @@
-# This starter workflow is for a CMake project running on multiple platforms. There is a different starter workflow if you just want a single platform.
-# See: https://github.com/actions/starter-workflows/blob/main/ci/cmake-single-platform.yml
 name: CMake on multiple platforms
 
 on:
@@ -13,101 +11,129 @@ env:
   BOOST_VER: 1.92.0
 
 jobs:
-  build:
-    runs-on: ${{ matrix.os }}
 
-    strategy:
-      fail-fast: false
-      matrix:
-        os: [ubuntu-latest, windows-latest]
-        build_type: [Release]
-        c_compiler: [gcc]
-        cpp_compiler: [g++]
-
+  build-linux:
+    runs-on: ubuntu-latest
     steps:
-    - uses: actions/checkout@v4
 
-    - name: Set reusable strings
-      id: strings
-      shell: bash
-      run: |
-        echo "MY_W_SPACE=${{ github.workspace }}" >> $GITHUB_ENV
-        echo "MY_B_SPACE=${{ runner.os == 'Windows' && '$MY_W_SPACE\build' || '$MY_W_SPACE/build' }}" >> $GITHUB_ENV
-        echo "build-output-dir=$MY_B_SPACE" >> "$GITHUB_OUTPUT"
+      - name: Install Dependencies
+        run: sudo apt-get install -y poppler-utils
+          
+      - name: Restore Boost from Cache
+        id: restore-cache-Boost
+        uses: actions/cache/restore@v4
+        with:
+          path: ~/boost-${{env.BOOST_VER}}
+          key: ${{ runner.os }}-Boost-${{ env.BOOST_VER }}
 
-    - name: Restore Boost from Cache
-      id: restore-cache-Boost
-      uses: actions/cache/restore@v4
-      with:
-        path: ${{ steps.strings.outputs.build-output-dir }}/boost-${{env.BOOST_VER}}
-        key: ${{ runner.os }}-Boost-${{ env.BOOST_VER }}
+      - name: Build Boost
+        if: steps.restore-cache-Boost.outputs.cache-hit != 'true'
+        run: |
+          cd ~
+          wget https://github.com/boostorg/boost/releases/download/boost-${{env.BOOST_VER}}/boost-${{env.BOOST_VER}}-cmake.tar.xz
+          tar -xJf boost-${{env.BOOST_VER}}-cmake.tar.xz
+          cd boost-${{env.BOOST_VER}}
+          cmake -S . -B build -DCMAKE_BUILD_TYPE=Release -DBOOST_RUNTIME_LINK=static -DBUILD_SHARED_LIBS=OFF -DBOOST_INCLUDE_LIBRARIES="program_options;nowide;predef;tokenizer"
+          cmake --build build
 
-    - name: Build Boost
-      shell: bash
-      if: steps.restore-cache-Boost.outputs.cache-hit != 'true'
-      working-directory: ${{ steps.strings.outputs.build-output-dir }}
-      run: |
-        wget https://github.com/boostorg/boost/releases/download/boost-${{env.BOOST_VER}}/boost-${{env.BOOST_VER}}-cmake.tar.xz
-        tar -xJf boost-${{env.BOOST_VER}}-cmake.tar.xz
-        cd boost-${{env.BOOST_VER}}
-        cmake -S . -B build -DCMAKE_BUILD_TYPE=Release -DBOOST_RUNTIME_LINK=static -DBUILD_SHARED_LIBS=OFF -DBOOST_INCLUDE_LIBRARIES="program_options;nowide;predef;tokenizer"
-        cmake --build build
+      - name: Save Boost to Cache
+        if: steps.restore-cache-Boost.outputs.cache-hit != 'true'
+        id: save-cache-Boost
+        uses: actions/cache/save@v4
+        with:
+          path: ~/boost-${{env.BOOST_VER}}
+          key: ${{ runner.os }}-Boost-${{ env.BOOST_VER }}
 
-    - name: Save Boost to Cache
-      if: steps.restore-cache-Boost.outputs.cache-hit != 'true'
-      id: save-cache-Boost
-      uses: actions/cache/save@v4
-      with:
-        path: ${{ steps.strings.outputs.build-output-dir }}/boost-${{env.BOOST_VER}}
-        key: ${{ runner.os }}-Boost-${{ env.BOOST_VER }}
+      - name: Install Boost
+        run: |
+          cd ~/boost-${{env.BOOST_VER}}
+          sudo cmake --build build --target install
 
-    - name: Install Boost
-      shell: bash
-      working-directory: ${{ steps.strings.outputs.build-output-dir }}/boost-${{env.BOOST_VER}}
-      run: sudo cmake --build build --target install
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
 
-    - name: ubuntu install poppler
-      if: runner.os == 'Linux'
-      run: sudo apt install -y poppler-utils
+      - name: Build project
+        id: build-project
+        run: |
+          cd $GITHUB_WORKSPACE
+          cmake -S . -B build -DCMAKE_BUILD_TYPE=Release
+          cmake --build build
 
-    - name: windows install poppler
-      if: runner.os == 'Windows'
-      shell: bash
-      working-directory: ${{ steps.strings.outputs.build-output-dir }}
-      run: |
-        wget https://github.com/oschwartz10612/poppler-windows/releases/download/v26.02.0-0/Release-26.02.0-0.zip
-        unzip -qq Release-26.02.0-0.zip
-        echo "${{ steps.strings.outputs.build-output-dir }}\poppler-26.02.0\Library\bin" >> $GITHUB_PATH
+      - name: Test project
+        id: test-project
+        run: |
+          cd $GITHUB_WORKSPACE/build
+          ctest --verbose 
 
-    - name: Configure CMake
-      working-directory: ${{ github.workspace }}
-      run: >
-        cmake -B ${{ steps.strings.outputs.build-output-dir }}
-        -DCMAKE_CXX_COMPILER=${{ matrix.cpp_compiler }}
-        -DCMAKE_C_COMPILER=${{ matrix.c_compiler }}
-        -DCMAKE_BUILD_TYPE=${{ matrix.build_type }}
-        -S ${{ github.workspace }}
+      - name: Upload artifact
+        uses: actions/upload-artifact@v4.6.2
+        with:
+          name: dompdfui_linux_x86_64
+          path: build/dompdfui
+          compression-level: 0
 
-    - name: Build
-      working-directory: ${{ github.workspace }}
-      run: cmake --build ${{ steps.strings.outputs.build-output-dir }} --config ${{ matrix.build_type }}
 
-    - name: Test
-      working-directory: ${{ steps.strings.outputs.build-output-dir }}
-      run: ctest --build-config ${{ matrix.build_type }} --verbose
+  build-windows:
+    runs-on: windows-latest
+    steps:
 
-    - name: Upload Linux artifact
-      if: runner.os == 'Linux'
-      uses: actions/upload-artifact@v4.6.2
-      with:
-        name: dompdfui_linux_x86_64
-        path: ${{ steps.strings.outputs.build-output-dir }}/dompdfui
-        compression-level: 0
+      - name: Install Dependencies
+        run: |
+          cd C:
+          iwr -outf Release-26.02.0-0.zip https://github.com/oschwartz10612/poppler-windows/releases/download/v26.02.0-0/Release-26.02.0-0.zip
+          unzip Release-26.02.0-0.zip
+          echo "C:\poppler-26.02.0\Library\bin" >> $GITHUB_PATH
+        
+      - name: Restore Boost from Cache
+        id: restore-cache-Boost
+        uses: actions/cache/restore@v4
+        with:
+          path: C:\boost-${{env.BOOST_VER}}
+          key: ${{ runner.os }}-Boost-${{ env.BOOST_VER }}
 
-    - name: Upload Windows Artifact
-      if: runner.os == 'Windows'
-      uses: actions/upload-artifact@v4
-      with:
-        name: dompdfui_windows_x86_64
-        path: ${{ steps.strings.outputs.build-output-dir }}\dompdfui.exe
-        compression-level: 0
+      - name: Build Boost
+        if: steps.restore-cache-Boost.outputs.cache-hit != 'true'
+        run: |
+          cd C:
+          iwr -outf boost-${{env.BOOST_VER}}.zip https://github.com/boostorg/boost/releases/download/boost-${{env.BOOST_VER}}/boost-${{env.BOOST_VER}}-cmake.zip
+          unzip boost-${{env.BOOST_VER}}.zip
+          cd boost-${{env.BOOST_VER}}
+          cmake -G "MinGW Makefiles" -S . -B build -DCMAKE_BUILD_TYPE=Release -DBOOST_RUNTIME_LINK=static -DBUILD_SHARED_LIBS=OFF -DBOOST_INCLUDE_LIBRARIES="program_options;nowide;predef;tokenizer"
+          cmake --build build
+
+      - name: Save Boost to Cache
+        if: steps.restore-cache-Boost.outputs.cache-hit != 'true'
+        id: save-cache-Boost
+        uses: actions/cache/save@v4
+        with:
+          path: C:\boost-${{env.BOOST_VER}}
+          key: ${{ runner.os }}-Boost-${{ env.BOOST_VER }}
+
+      - name: Install Boost
+        run: |
+          cd C:\boost-${{env.BOOST_VER}}
+          cmake --build build --target install
+
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+
+      - name: Build project
+        id: build-project
+        run: |
+          cmake -G "MinGW Makefiles" -S . -B build -DCMAKE_BUILD_TYPE=Release -DBoost_DIR="C:/Boost/lib/cmake/Boost-${{ env.BOOST_VER }}" -DCMAKE_TLS_VERIFY=OFF
+          cmake --build build
+
+      - name: Test project
+        id: test-project
+        working-directory: $GITHUB_WORKSPACE\build
+        run: ctest -V
+
+      - name: Upload Windows Artifact
+        uses: actions/upload-artifact@v4
+        with:
+          name: dompdfui_windows_x86_64
+          path: build\dompdfui.exe
+          compression-level: 0
+
