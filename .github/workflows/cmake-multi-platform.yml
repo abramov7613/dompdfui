@@ -128,7 +128,7 @@ jobs:
       - name: Test project
         id: test-project
         run: |
-          cd $GITHUB_WORKSPACE\build
+          cd build
           ctest -V
 
       - name: Upload Windows Artifact
