@@ -261,17 +261,17 @@ protected:
           text.string()
       };
 
-      auto [result, stdout, stderr] = run_program(pdftotext.string(), arguments);
+      auto [result_, stdout_, stderr_] = run_program(pdftotext.string(), arguments);
 
-      EXPECT_EQ(result, 0)
+      EXPECT_EQ(result_, 0)
           << "pdftotext failed for "
           << pdf.string()
           << '\n'
-          << stdout
+          << stdout_
           << '\n'
-          << stderr ;
+          << stderr_ ;
 
-      if (result != 0 || !fs::exists(text)) {
+      if (result_ != 0 || !fs::exists(text)) {
           return {};
       }
 
