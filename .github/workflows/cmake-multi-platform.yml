@@ -83,7 +83,7 @@ jobs:
           cd C:
           iwr -outf Release-26.02.0-0.zip https://github.com/oschwartz10612/poppler-windows/releases/download/v26.02.0-0/Release-26.02.0-0.zip
           unzip Release-26.02.0-0.zip
-          echo "C:\poppler-26.02.0\Library\bin" >> $GITHUB_PATH
+          "C:\poppler-26.02.0\Library\bin" | Out-File -FilePath $env:GITHUB_PATH -Encoding utf8 -Append
         
       - name: Restore Boost from Cache
         id: restore-cache-Boost
