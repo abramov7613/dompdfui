@@ -662,6 +662,8 @@ TEST_F(DompdfUiIntegrationTest, RemoteResources)
     EXPECT_NE(
         text.find("Tangerine"),
         std::string::npos);
+
+    EXPECT_GT(fs::file_size(pdf), 30*1024);
 }
 
 

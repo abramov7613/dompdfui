@@ -18,7 +18,7 @@ jobs:
 
       - name: Install Dependencies
         run: sudo apt-get install -y poppler-utils
-          
+
       - name: Restore Boost from Cache
         id: restore-cache-Boost
         uses: actions/cache/restore@v4
@@ -64,14 +64,20 @@ jobs:
         id: test-project
         run: |
           cd $GITHUB_WORKSPACE/build
-          ctest --verbose 
+          ctest --verbose
 
-      - name: Upload artifact
+      - name: Upload Linux Build artifact
         uses: actions/upload-artifact@v4.6.2
         with:
           name: dompdfui_linux_x86_64
           path: build/dompdfui
           compression-level: 0
+
+      - name: Upload Linux TestReports artifact
+        uses: actions/upload-artifact@v4.6.2
+        with:
+          name: linux_test_reports
+          path: build/test_results
 
 
   build-windows:
@@ -84,7 +90,7 @@ jobs:
           iwr -outf Release-26.02.0-0.zip https://github.com/oschwartz10612/poppler-windows/releases/download/v26.02.0-0/Release-26.02.0-0.zip
           unzip Release-26.02.0-0.zip
           "C:\poppler-26.02.0\Library\bin" | Out-File -FilePath $env:GITHUB_PATH -Encoding utf8 -Append
-        
+
       - name: Restore Boost from Cache
         id: restore-cache-Boost
         uses: actions/cache/restore@v4
@@ -131,10 +137,16 @@ jobs:
           cd build
           ctest -V
 
-      - name: Upload Windows Artifact
+      - name: Upload Windows Build Artifact
         uses: actions/upload-artifact@v4
         with:
           name: dompdfui_windows_x86_64
           path: build\dompdfui.exe
           compression-level: 0
+
+      - name: Upload Windows TestReports Artifact
+        uses: actions/upload-artifact@v4
+        with:
+          name: windows_test_reports
+          path: build\test_results
 
