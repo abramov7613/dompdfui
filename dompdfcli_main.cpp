@@ -242,7 +242,7 @@ std::pair<std::string, std::string> generate_php_script(const ApplicationOptions
 void run_php_script(const std::string& name, const std::string& body, const ApplicationOptions& opts)
 {
   auto script_path = temp_path() / name ;
-  std::string working_directory = temp_path().string() ;
+  std::string php_ini_include_path = "include_path=" + temp_path().string();
   nw::ofstream script( script_path ) ;
   if(!script.is_open()) throw std::runtime_error("Can't open file: " + script_path.string()) ;
   script << body ;
@@ -255,10 +255,13 @@ void run_php_script(const std::string& name, const std::string& body, const Appl
       (temp_path() / "php.exe").string(),
       std::string{"-d"},
       memlimit,
+      std::string{"-d"},
+      php_ini_include_path,
       script_path.filename().string(),
       in_files[i].string(),
       out_files[i].string(),
     };
+    std::string working_directory = in_files[i].parent_path().string() ;
     reproc::options options;
     options.redirect.parent = true;
     options.working_directory = working_directory.data();
