@@ -212,7 +212,12 @@ std::pair<std::string, std::string> generate_php_script(const ApplicationOptions
     "$options->setDefaultPaperSize('"               << opts.defaultPaperSize() << "');\n"
     "$options->setDefaultPaperOrientation('"        << opts.defaultPaperOrientation() << "');\n"
     "$options->setDefaultFont('"                    << opts.defaultFont() << "');\n" ;
-  if(!opts.allowedRemoteHosts().empty())
+  if (!opts.isRemoteEnabled()) {
+    std::string s;
+    for (const auto& e: opts.in_files()) s += e.parent_path().string() + ',' ;
+    script_body << "$options->setChroot('" << s << "');\n" ;
+  }
+  if (!opts.allowedRemoteHosts().empty())
     script_body << "$options->setAllowedRemoteHosts(" << make_php_array(opts.allowedRemoteHosts()) << ");\n" ;
   script_body << "\n$dompdf = new Dompdf($options);\n" ;
   if( opts.isRemoteEnabled() && opts.sslAllowSelfSigned() ) {
@@ -242,7 +247,6 @@ std::pair<std::string, std::string> generate_php_script(const ApplicationOptions
 void run_php_script(const std::string& name, const std::string& body, const ApplicationOptions& opts)
 {
   auto script_path = temp_path() / name ;
-  std::string php_ini_include_path = "include_path=" + temp_path().string();
   nw::ofstream script( script_path ) ;
   if(!script.is_open()) throw std::runtime_error("Can't open file: " + script_path.string()) ;
   script << body ;
@@ -255,9 +259,7 @@ void run_php_script(const std::string& name, const std::string& body, const Appl
       (temp_path() / "php.exe").string(),
       std::string{"-d"},
       memlimit,
-      std::string{"-d"},
-      php_ini_include_path,
-      script_path.filename().string(),
+      script_path.string(),
       in_files[i].string(),
       out_files[i].string(),
     };
