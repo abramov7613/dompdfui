@@ -92,10 +92,8 @@ TEST_F(CliOptionsTest, UsesDefaultValues)
 
     EXPECT_EQ(opts.dpi(), "96");
     EXPECT_EQ(opts.fontHeightRatio(), "1.1");
-    EXPECT_EQ(opts.defaultMediaType(), "screen");
     EXPECT_EQ(opts.defaultPaperSize(), "a4");
     EXPECT_EQ(opts.defaultPaperOrientation(), "portrait");
-    EXPECT_EQ(opts.defaultFont(), "dejavu serif");
 
     EXPECT_TRUE(opts.allowedRemoteHosts().empty());
 }
@@ -150,19 +148,15 @@ TEST_F(CliOptionsTest, ParsesStringDompdfOptions)
 
     args.insert(args.begin() + 1, "--dpi=144");
     args.insert(args.begin() + 2, "--fontHeightRatio=1.25");
-    args.insert(args.begin() + 3, "--defaultMediaType=print");
-    args.insert(args.begin() + 4, "--defaultPaperSize=letter");
-    args.insert(args.begin() + 5, "--defaultPaperOrientation=landscape");
-    args.insert(args.begin() + 6, "--defaultFont=DejaVu Sans");
+    args.insert(args.begin() + 3, "--defaultPaperSize=letter");
+    args.insert(args.begin() + 4, "--defaultPaperOrientation=landscape");
 
     auto opts = parse(args);
 
     EXPECT_EQ(opts.dpi(), "144");
     EXPECT_EQ(opts.fontHeightRatio(), "1.25");
-    EXPECT_EQ(opts.defaultMediaType(), "print");
     EXPECT_EQ(opts.defaultPaperSize(), "letter");
     EXPECT_EQ(opts.defaultPaperOrientation(), "landscape");
-    EXPECT_EQ(opts.defaultFont(), "DejaVu Sans");
 }
 
 TEST_F(CliOptionsTest, ParsesMultipleAllowedRemoteHosts)
@@ -327,12 +321,10 @@ TEST_F(CliOptionsTest, AcceptsCombinedDompdfConfiguration)
     args.insert(args.begin() + 4, "--sslAllowSelfSigned=true");
     args.insert(args.begin() + 5, "--dpi=192");
     args.insert(args.begin() + 6, "--fontHeightRatio=1.3");
-    args.insert(args.begin() + 7, "--defaultMediaType=print");
-    args.insert(args.begin() + 8, "--defaultPaperSize=A3");
-    args.insert(args.begin() + 9, "--defaultPaperOrientation=landscape");
-    args.insert(args.begin() + 10, "--defaultFont=DejaVu Sans");
-    args.insert(args.begin() + 11, "--allowedRemoteHosts=example.com");
-    args.insert(args.begin() + 12, "--allowedRemoteHosts=cdn.example.com");
+    args.insert(args.begin() + 7, "--defaultPaperSize=A3");
+    args.insert(args.begin() + 8, "--defaultPaperOrientation=landscape");
+    args.insert(args.begin() + 9, "--allowedRemoteHosts=example.com");
+    args.insert(args.begin() + 10, "--allowedRemoteHosts=cdn.example.com");
 
     auto opts = parse(args);
 
@@ -343,10 +335,8 @@ TEST_F(CliOptionsTest, AcceptsCombinedDompdfConfiguration)
 
     EXPECT_EQ(opts.dpi(), "192");
     EXPECT_EQ(opts.fontHeightRatio(), "1.3");
-    EXPECT_EQ(opts.defaultMediaType(), "print");
     EXPECT_EQ(opts.defaultPaperSize(), "A3");
     EXPECT_EQ(opts.defaultPaperOrientation(), "landscape");
-    EXPECT_EQ(opts.defaultFont(), "DejaVu Sans");
 
     ASSERT_EQ(opts.allowedRemoteHosts().size(), 2u);
     EXPECT_EQ(opts.allowedRemoteHosts()[0], "example.com");
