@@ -132,8 +132,7 @@ ApplicationOptions parse_cli_args(int argc, char** argv)
     po::notify(vm);
     if (vm.count("help")) {
         nw::cout <<  short_descr << ' ' << git_tag_str << "\nUsage:\t" << argv[0]
-                            << " [OPTIONS] INPUT-FILE1 [INPUT-FILE2] [INPUT-FILE3] [...] OUTPUT-DIR \n"
-                            << (po::options_description("").add(popts).add(dopts)) << '\n';
+                 << " [OPTIONS] INPUT-FILE1 [INPUT-FILE2] [INPUT-FILE3] [...] OUTPUT-DIR \n" << popts << '\n';
         throw CommandLineHelp{};
     }
     if (vm.count("version")) {
