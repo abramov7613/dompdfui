@@ -108,29 +108,24 @@ ApplicationOptions parse_cli_args(int argc, char** argv)
     hopts.add_options()
         ("iofiles", po::value<std::vector<std::string>>(), "input output files")
         ;
-    po::options_description popts("Program Options");
+    po::options_description popts("Options");
     popts.add_options()
         ("php-memory-limit,m", po::value<unsigned long long>()->default_value(268435456), "Limits the amount of memory (in bytes) a php-cli can use.")
         ("version,v", "print version")
         ("help,h", "view this help message")
         ("force-out,f", po::bool_switch(), "replace output file if exists")
-        ;
-    po::options_description dopts("DomPdf Options");
-    dopts.add_options()
         ("isRemoteEnabled", po::value<bool>()->default_value(false))
         ("isJavascriptEnabled", po::value<bool>()->default_value(true))
         ("isFontSubsettingEnabled", po::value<bool>()->default_value(true))
         ("sslAllowSelfSigned", po::value<bool>()->default_value(false))
         ("dpi", po::value<std::string>()->default_value("96"))
         ("fontHeightRatio", po::value<std::string>()->default_value("1.1"))
-        ("defaultMediaType", po::value<std::string>()->default_value("screen"))
         ("defaultPaperSize", po::value<std::string>()->default_value("a4"))
         ("defaultPaperOrientation", po::value<std::string>()->default_value("portrait"))
-        ("defaultFont", po::value<std::string>()->default_value("dejavu serif"))
         ("allowedRemoteHosts", po::value<std::vector<std::string>>())
         ;
     po::options_description allopts("");
-    allopts.add(hopts).add(popts).add(dopts);
+    allopts.add(hopts).add(popts);
     po::positional_options_description p;
     p.add("iofiles", -1);
     po::store(po::command_line_parser(argc, argv).options(allopts).positional(p).run(), vm);

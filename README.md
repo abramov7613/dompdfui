@@ -35,9 +35,7 @@ You can build from source or download release from [Releases](https://github.com
 dompdfui [OPTIONS] INPUT-FILE1 [INPUT-FILE2] [INPUT-FILE3] [...] OUTPUT-DIR
 ```
 
-At least one input file and output directory must be specified. The program extracts the PHP interpreter and Dompdf library into a temporary directory, and deletes it after completion. The output files are saved in the specified directory with the extension changed to pdf. Options are divided into two categories: for application and for Dompdf library:
-
-### Application Options
+At least one input file and output directory must be specified. The program extracts the PHP interpreter and Dompdf library into a temporary directory, and deletes it after completion. The output files are saved in the specified directory with the extension changed to pdf.
 
 | Short Option | Long Option | Default | Description |
 | ----------- | ------------ | ------- | ----------- |
@@ -45,24 +43,15 @@ At least one input file and output directory must be specified. The program extr
 | `-h` | `--help` || print help message |
 | `-m` | `--php-memory-limit` | 268435456 | Limits the amount of memory (in bytes) a php-cli can use |
 | `-f` | `--force-out` || replace output file if exists | |
-
-### Dompdf library Options
-
-| Option | Default | Description |
-| ------ | ------- | ----------- |
-| `--isRemoteEnabled` | false | Enable remote file access. If this setting is set to true, DOMPDF will access remote sites for images and CSS files as required. |
-| `--isJavascriptEnabled` | true | Enable inline JavaScript. If this setting is set to true then DOMPDF will automatically insert JavaScript code contained within `<script type="text/javascript"> ... </script>` tags as written into the PDF. NOTE: This is PDF-based JavaScript to be executed by the PDF viewer, not browser-based JavaScript executed by Dompdf. |
-| `--isFontSubsettingEnabled` | true | Whether to enable font subsetting or not. |
-| `--sslAllowSelfSigned` | false | Enable downloading fonts or images that are hosted on a server with a self-signed security certificate or other certificate problems; ignore if `--isRemoteEnabled=false` |
-| `--dpi` | 96 | Image DPI setting. This setting determines the default DPI setting for images and fonts. The DPI may be overridden for inline images by explicitly setting the image's width & height style attributes (i.e. if the image's native width is 600 pixels and you specify the image's width as 72 points, the image will have a DPI of 600 in the rendered PDF. The DPI of background images can not be overridden and is controlled entirely via this parameter. For the purposes of DOMPDF, pixels per inch (PPI) = dots per inch (DPI). If a size in html is given as px (or without unit as image size), this tells the corresponding size in pt at 72 DPI. This adjusts the relative sizes to be similar to the rendering of the html page in a reference browser. In pdf, always 1 pt = 1/72 inch. |
-| `--fontHeightRatio` | 1.1 | A ratio applied to the fonts height to be more like browsers line height. |
-| `--defaultMediaType` | screen | Styles targeted to this media type are applied to the document. This is on top of the media types that are always applied: all, static, visual, bitmap, paged, dompdf. |
-| `--defaultPaperSize` | a4 | The default paper size. Available values: "4a0", "2a0", "a0", "a1", "a2", "a3", "a4", "a5", "a6", "a7", "a8", "a9", "a10", "b0", "b1", "b2", "b3", "b4", "b5", "b6", "b7", "b8", "b9", "b10", "c0", "c1", "c2", "c3", "c4", "c5", "c6", "c7", "c8", "c9", "c10", "ra0", "ra1", "ra2", "ra3", "ra4", "sra0", "sra1", "sra2", "sra3", "sra4", "letter", "half-letter", "legal", "ledger", "tabloid", "executive", "folio", "commercial #10 envelope", "catalog #10 1/2 envelope", "8.5x11", "8.5x14", "11x17". North America standard is "letter"; other countries generally "a4". |
-| `--defaultPaperOrientation` | portrait | The orientation of the page ('portrait' or 'landscape'). |
-| `--defaultFont` | dejavu serif | Used if no suitable fonts can be found. This must exist in the font folder. |
-| `--allowedRemoteHosts` || It is Array of strings and can be specify multiple times. List of allowed remote hosts. Each value of the array must be a valid hostname. This will be used to filter which resources can be loaded in combination with isRemoteEnabled. If isRemoteEnabled is FALSE, then this will have no effect. Allow any remote host if not specified. |
-
-Additional documentation is available at the [Dompdf Wiki](https://github.com/dompdf/dompdf/wiki)
+|| `--isRemoteEnabled` | false | Enable remote file access. If this setting is set to true, DOMPDF will access remote sites for images, fonts and CSS files as required. |
+|| `--isJavascriptEnabled` | true | Enable inline JavaScript. If this setting is set to true then DOMPDF will automatically insert JavaScript code contained within `<script type="text/javascript"> ... </script>` tags as written into the PDF. NOTE: This is PDF-based JavaScript to be executed by the PDF viewer, not browser-based JavaScript executed by Dompdf. |
+|| `--isFontSubsettingEnabled` | true | Whether to enable font subsetting or not. |
+|| `--sslAllowSelfSigned` | false | Enable downloading fonts or images that are hosted on a server with a self-signed security certificate or other certificate problems; ignore if `--isRemoteEnabled=false` |
+|| `--dpi` | 96 | Image DPI setting. This setting determines the default DPI setting for images and fonts. The DPI may be overridden for inline images by explicitly setting the image's width & height style attributes (i.e. if the image's native width is 600 pixels and you specify the image's width as 72 points, the image will have a DPI of 600 in the rendered PDF. The DPI of background images can not be overridden and is controlled entirely via this parameter. For the purposes of DOMPDF, pixels per inch (PPI) = dots per inch (DPI). If a size in html is given as px (or without unit as image size), this tells the corresponding size in pt at 72 DPI. This adjusts the relative sizes to be similar to the rendering of the html page in a reference browser. In pdf, always 1 pt = 1/72 inch. |
+|| `--fontHeightRatio` | 1.1 | A ratio applied to the fonts height to be more like browsers line height. |
+|| `--defaultPaperSize` | a4 | The default paper size. Available values: "4a0", "2a0", "a0", "a1", "a2", "a3", "a4", "a5", "a6", "a7", "a8", "a9", "a10", "b0", "b1", "b2", "b3", "b4", "b5", "b6", "b7", "b8", "b9", "b10", "c0", "c1", "c2", "c3", "c4", "c5", "c6", "c7", "c8", "c9", "c10", "ra0", "ra1", "ra2", "ra3", "ra4", "sra0", "sra1", "sra2", "sra3", "sra4", "letter", "half-letter", "legal", "ledger", "tabloid", "executive", "folio", "commercial #10 envelope", "catalog #10 1/2 envelope", "8.5x11", "8.5x14", "11x17". North America standard is "letter"; other countries generally "a4". |
+|| `--defaultPaperOrientation` | portrait | The orientation of the page ('portrait' or 'landscape'). |
+|| `--allowedRemoteHosts` || It is Array of strings and can be specify multiple times. List of allowed remote hosts. Each value of the array must be a valid hostname. This will be used to filter which resources can be loaded in combination with isRemoteEnabled. If isRemoteEnabled is FALSE, then this will have no effect. Allow any remote host if not specified. |
 
 ## Build from source
 
@@ -85,4 +74,4 @@ cmake --build build
 cd build
 ctest -V
 ```
-After that you will find target executable in build directory.
+After that you will find target executable in `build` directory.
