@@ -6,9 +6,10 @@ This is a small, portable command-line tool that combines [Static-PHP-cli](https
 
  * Handles most CSS 2.1 and a few CSS3 properties, including @import, @media &
    @page rules
+ * Supports embedding fonts so long as it has been accessible and reference in CSS `@font-face` rules
  * Supports most presentational HTML 4.0 attributes
- * Supports external stylesheets, either local or through http/ftp (via
-   fopen-wrappers)
+ * Supports BASE64 encoding
+ * Supports external stylesheets, either local or through http/ftp
  * Supports complex tables, including row & column spans, separate & collapsed
    border models, individual cell styling
  * Image support (gif, png (8, 24 and 32 bit with alpha channel), bmp & jpeg)
