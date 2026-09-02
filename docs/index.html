@@ -89,6 +89,10 @@
 
     footer{margin-top:26px;padding:18px;border-radius:12px;background:linear-gradient(90deg, rgba(255,255,255,0.01), rgba(255,255,255,0.005));display:flex;justify-content:space-between;align-items:center}
 
+    table.options{width:100%;border-collapse:collapse;margin-top:8px}
+    table.options th, table.options td{border:1px solid rgba(255,255,255,0.04);padding:8px;text-align:left;font-size:13px}
+    table.options th{background:rgba(255,255,255,0.02);font-weight:600}
+
     @media (max-width:980px){
       .hero{grid-template-columns:1fr;}
       .steps{grid-template-columns:1fr}
@@ -107,11 +111,16 @@
 
     <div class="hero">
       <div class="card">
-        <p class="lead">Welcome! dompdfui helps you turn HTML documents and written pages into polished, downloadable PDF files — quickly and without fuss. You don't need to understand technical details or install anything. Just provide your content, choose a layout, and get a ready-to-share PDF.</p>
+        <p class="lead">Welcome! dompdfui helps you turn HTML documents and written pages into polished, downloadable PDF files — quickly and without fuss. You don't need to understand technical details to generate PDFs from HTML/CSS: dompdfui bundles a small PHP runtime and the Dompdf library into a single portable executable so you can convert local or remote HTML into printable, styled PDF documents.</p>
+
+        <section id="description">
+          <h2>Description</h2>
+          <p class="lead">This is a small, portable command-line tool that combines <a href="https://github.com/crazywhalecc/static-php-cli" target="_blank">Static-PHP-cli</a> and the <a href="https://github.com/dompdf/dompdf" target="_blank">Dompdf library</a> to convert HTML documents to PDF. The executable extracts a PHP interpreter and Dompdf into a temporary directory during runtime, performs the conversion, and cleans up after completion — so there are no external runtime dependencies to install.</p>
+        </section>
 
         <section id="what">
           <h2>What is this for?</h2>
-          <p class="lead">Whether you need a shareable invoice, a printable report, a resume, or a saved copy of a webpage, dompdfui gives you an easy way to create PDFs while preserving CSS styles. It aims to help you complete a task rather than settings you don't need.</p>
+          <p class="lead">Whether you need a shareable invoice, a printable report, a resume, or a saved copy of a webpage, dompdfui gives you an easy way to create PDFs while preserving CSS styling and layout. It supports local and remote stylesheets, embedded fonts (via @font-face), images and complex tables so your output looks like the original page.</p>
         </section>
 
         <section id="how-it-helps">
@@ -121,8 +130,124 @@
             <li>Create professional-looking documents without design experience.</li>
             <li>Save time: single-command export and consistent formatting across pages.</li>
             <li>Automatically generate reports in HTML/CSS and save them in PDF.</li>
+            <li>Bundle HTML, CSS and assets into automated pipelines (CI/CD) to produce PDFs as part of releases, invoices, or reports.</li>
+            <li>Preserve fonts and images by embedding or referencing them in CSS so printed output matches on-screen design.</li>
+            <li>Works offline — the tool is portable and extracts a runtime locally for environments without permanent PHP/Dompdf installs.</li>
+            <li>Accepts multiple input files to produce a set of PDFs in a single command, useful for batch conversions.</li>
+            <li>Helpful for developers, product managers, and non-technical users who need reliable, repeatable PDF output from styled HTML.</li>
           </ul>
         </section>
+
+        <section id="options">
+          <h2>Command-line options</h2>
+          <p class="small">Usage: <code>dompdfui [OPTIONS] INPUT-FILE1 [INPUT-FILE2] [...] OUTPUT-DIR</code></p>
+
+          <table class="options">
+            <thead>
+              <tr>
+                <th>Short Option</th>
+                <th>Long Option</th>
+                <th>Default</th>
+                <th>Description</th>
+              </tr>
+            </thead>
+            <tbody>
+              <tr>
+                <td><code>-v</code></td>
+                <td><code>--version</code></td>
+                <td>—</td>
+                <td>Print version</td>
+              </tr>
+              <tr>
+                <td><code>-h</code></td>
+                <td><code>--help</code></td>
+                <td>—</td>
+                <td>Print help message</td>
+              </tr>
+              <tr>
+                <td><code>-m</code></td>
+                <td><code>--php-memory-limit</code></td>
+                <td>268435456</td>
+                <td>Limits the amount of memory (in bytes) the PHP CLI can use</td>
+              </tr>
+              <tr>
+                <td><code>-f</code></td>
+                <td><code>--force-out</code></td>
+                <td>—</td>
+                <td>Replace output file if it exists</td>
+              </tr>
+              <tr>
+                <td>—</td>
+                <td><code>--isRemoteEnabled</code></td>
+                <td>false</td>
+                <td>Enable remote file access (images, fonts, stylesheets) when set to true</td>
+              </tr>
+              <tr>
+                <td>—</td>
+                <td><code>--isJavascriptEnabled</code></td>
+                <td>true</td>
+                <td>Enable inline JavaScript processing (if applicable)</td>
+              </tr>
+              <tr>
+                <td>—</td>
+                <td><code>--isFontSubsettingEnabled</code></td>
+                <td>true</td>
+                <td>Enable font subsetting to reduce output size</td>
+              </tr>
+              <tr>
+                <td>—</td>
+                <td><code>--sslAllowSelfSigned</code></td>
+                <td>false</td>
+                <td>Allow downloading assets from servers with self-signed or problematic SSL certificates (requires remote enabled)</td>
+              </tr>
+              <tr>
+                <td>—</td>
+                <td><code>--dpi</code></td>
+                <td>96</td>
+                <td>Image DPI setting; determines default DPI for images and fonts</td>
+              </tr>
+              <tr>
+                <td>—</td>
+                <td><code>--fontHeightRatio</code></td>
+                <td>1.1</td>
+                <td>Ratio applied to font height to better match browser line height</td>
+              </tr>
+              <tr>
+                <td>—</td>
+                <td><code>--defaultPaperSize</code></td>
+                <td>a4</td>
+                <td>Default paper size (e.g. a4, letter, a3, etc.)</td>
+              </tr>
+              <tr>
+                <td>—</td>
+                <td><code>--defaultPaperOrientation</code></td>
+                <td>portrait</td>
+                <td>Page orientation: <code>portrait</code> or <code>landscape</code></td>
+              </tr>
+              <tr>
+                <td>—</td>
+                <td><code>--allowedRemoteHosts</code></td>
+                <td>—</td>
+                <td>List of allowed remote hostnames (can be specified multiple times) used to filter remote requests</td>
+              </tr>
+            </tbody>
+          </table>
+        </section>
+
+      </div>
+
+      <div class="preview card">
+        <div class="r-header">
+          <div class="doc-mini"></div>
+          <div>
+            <div style="font-weight:700">Preview</div>
+            <div class="small">Example output</div>
+          </div>
+        </div>
+        <div class="content">PDF preview will appear here when running locally.</div>
+      </div>
+
+    </div>
 
   </div>
 </body>
