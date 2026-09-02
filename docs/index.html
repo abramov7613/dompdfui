@@ -20,15 +20,11 @@
       color-scheme: dark;
     }
     html,body{height:100%;}
-    body{
-      margin:0;
-      font-family: Inter, system-ui, -apple-system, "Segoe UI", Roboto, "Helvetica Neue", Arial;
-      background: linear-gradient(120deg,var(--bg1), var(--bg2));
-      -webkit-font-smoothing:antialiased;
-      -moz-osx-font-smoothing:grayscale;
-      color: #eef2f5;
-      line-height:1.5;
+    body {
+      background: linear-gradient(120deg, var(--bg1), var(--bg2));
+      background-attachment: fixed;
     }
+
 
     .container{
       max-width:1100px;
@@ -111,11 +107,11 @@
 
     <div class="hero">
       <div class="card">
-        <p class="lead">Welcome! dompdfui helps you turn HTML documents and written pages into polished, downloadable PDF files — quickly and without fuss. You don't need to understand technical details to generate PDFs from HTML/CSS: dompdfui bundles a small PHP runtime and the Dompdf library into a single portable executable so you can convert local or remote HTML into printable, styled PDF documents.</p>
+        <p class="lead">Welcome! <a href="https://github.com/abramov7613/dompdfui/releases" target="_blank">dompdfui</a> helps you turn HTML documents and written pages into polished, downloadable PDF files — quickly and without fuss. You don't need to understand technical details to generate PDFs from HTML/CSS: dompdfui bundles a small PHP runtime and the Dompdf library into a single portable executable so you can convert local or remote HTML into printable, styled PDF documents.</p>
 
         <section id="description">
           <h2>Description</h2>
-          <p class="lead">This is a small, portable command-line tool that combines <a href="https://github.com/crazywhalecc/static-php-cli" target="_blank">Static-PHP-cli</a> and the <a href="https://github.com/dompdf/dompdf" target="_blank">Dompdf library</a> to convert HTML documents to PDF. The executable extracts a PHP interpreter and Dompdf into a temporary directory during runtime, performs the conversion, and cleans up after completion — so there are no external runtime dependencies to install.</p>
+          <p class="lead">This is a small, portable command-line tool that combines "Static-PHP-cli" and the "Dompdf" library to convert HTML documents to PDF. The executable extracts a PHP interpreter and Dompdf into a temporary directory during runtime, performs the conversion, and cleans up after completion — so there are no external runtime dependencies to install.</p>
         </section>
 
         <section id="what">
@@ -128,7 +124,7 @@
           <ul class="muted">
             <li>Turn online content into offline copies you can keep or print.</li>
             <li>Create professional-looking documents without design experience.</li>
-            <li>Save time: single-command export and consistent formatting across pages.</li>
+            <li>Save time: single-command to export and consistent formatting across pages.</li>
             <li>Automatically generate reports in HTML/CSS and save them in PDF.</li>
             <li>Bundle HTML, CSS and assets into automated pipelines (CI/CD) to produce PDFs as part of releases, invoices, or reports.</li>
             <li>Preserve fonts and images by embedding or referencing them in CSS so printed output matches on-screen design.</li>
@@ -234,17 +230,6 @@
           </table>
         </section>
 
-      </div>
-
-      <div class="preview card">
-        <div class="r-header">
-          <div class="doc-mini"></div>
-          <div>
-            <div style="font-weight:700">Preview</div>
-            <div class="small">Example output</div>
-          </div>
-        </div>
-        <div class="content">PDF preview will appear here when running locally.</div>
       </div>
 
     </div>
