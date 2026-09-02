@@ -1,0 +1,129 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width,initial-scale=1" />
+  <title>dompdfui — Simple PDF preview & generation</title>
+
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;600;700&family=Playfair+Display:wght@600;700&display=swap" rel="stylesheet">
+
+  <style>
+    :root{
+      --bg1: #0f2027;
+      --bg2: #2c5364;
+      --card: rgba(255,255,255,0.04);
+      --muted: rgba(255,255,255,0.75);
+      --accent: #7bd389;
+      --glass: rgba(255,255,255,0.06);
+      color-scheme: dark;
+    }
+    html,body{height:100%;}
+    body{
+      margin:0;
+      font-family: Inter, system-ui, -apple-system, "Segoe UI", Roboto, "Helvetica Neue", Arial;
+      background: linear-gradient(120deg,var(--bg1), var(--bg2));
+      -webkit-font-smoothing:antialiased;
+      -moz-osx-font-smoothing:grayscale;
+      color: #eef2f5;
+      line-height:1.5;
+    }
+
+    .container{
+      max-width:1100px;
+      margin:40px auto;
+      padding:28px;
+    }
+
+    header{
+      display:flex;
+      gap:20px;
+      align-items:center;
+      margin-bottom:28px;
+    }
+    .logo{
+      width:84px;height:84px;flex:0 0 84px;border-radius:12px;
+      background:linear-gradient(135deg,#1abc9c,#16a085);
+      display:grid;place-items:center;font-weight:700;color:#042b22;font-family:Playfair Display,serif;font-size:26px;
+      box-shadow:0 6px 20px rgba(2,20,16,0.4);
+    }
+    h1{font-family:Playfair Display,serif;margin:0;font-weight:700;font-size:34px;}
+    .subtitle{color:var(--muted);margin-top:6px;font-size:15px}
+
+    .hero{
+      display:grid;grid-template-columns:1fr 420px;gap:28px;align-items:start;margin-bottom:28px;
+    }
+
+    .card{
+      background:linear-gradient(180deg, rgba(255,255,255,0.02), rgba(255,255,255,0.01));
+      border-radius:14px;padding:22px;box-shadow:0 8px 30px rgba(2,10,12,0.35);backdrop-filter: blur(6px);
+    }
+
+    .lead{font-size:16px;color:#e6eef0}
+    .features{display:flex;flex-direction:column;gap:12px;margin-top:14px}
+    .feature{display:flex;gap:12px;align-items:flex-start}
+    .feature .dot{width:12px;height:12px;border-radius:3px;background:var(--accent);margin-top:6px;flex:0 0 12px}
+    .btn-row{display:flex;gap:12px;margin-top:18px}
+    .btn{background:linear-gradient(90deg,#2dd4bf,#06b6d4);color:#052022;padding:10px 14px;border-radius:10px;font-weight:600;text-decoration:none;box-shadow:0 6px 18px rgba(6,182,212,0.12);}
+
+    /* Right column preview */
+    .preview{
+      height:480px;border-radius:12px;overflow:hidden;border:1px solid rgba(255,255,255,0.04);background:linear-gradient(180deg, rgba(255,255,255,0.02), rgba(0,0,0,0.02));display:flex;flex-direction:column;
+    }
+    .preview .r-header{padding:14px 16px;background:linear-gradient(90deg, rgba(255,255,255,0.02), rgba(255,255,255,0.01));display:flex;align-items:center;gap:10px}
+    .doc-mini{width:48px;height:36px;border-radius:6px;background:linear-gradient(180deg,#fff,#e6eef0);opacity:0.95}
+    .preview .content{flex:1;display:grid;place-items:center;color:#9fb7b9;padding:18px}
+
+    section{margin-bottom:18px}
+    h2{margin:0 0 8px 0;font-size:20px}
+
+    .steps{display:grid;grid-template-columns:repeat(3,1fr);gap:12px;margin-top:12px}
+    .step{background:var(--glass);padding:14px;border-radius:10px}
+    .step h3{margin:0;font-size:15px}
+    .muted{color:var(--muted);font-size:14px}
+
+    .faq{display:grid;gap:10px}
+    .faq-item{background:transparent;padding:12px;border-radius:8px;border:1px solid rgba(255,255,255,0.03)}
+    .small{font-size:13px;color:var(--muted)}
+
+    footer{margin-top:26px;padding:18px;border-radius:12px;background:linear-gradient(90deg, rgba(255,255,255,0.01), rgba(255,255,255,0.005));display:flex;justify-content:space-between;align-items:center}
+
+    @media (max-width:980px){
+      .hero{grid-template-columns:1fr;}
+      .steps{grid-template-columns:1fr}
+    }
+  </style>
+</head>
+<body>
+  <div class="container">
+    <header>
+      <div class="logo">PDF</div>
+      <div>
+        <h1>dompdfui</h1>
+        <div class="subtitle">A simple, friendly command line interface for creating PDFs from HTML files</div>
+      </div>
+    </header>
+
+    <div class="hero">
+      <div class="card">
+        <p class="lead">Welcome! dompdfui helps you turn HTML documents and written pages into polished, downloadable PDF files — quickly and without fuss. You don't need to understand technical details or install anything. Just provide your content, choose a layout, and get a ready-to-share PDF.</p>
+
+        <section id="what">
+          <h2>What is this for?</h2>
+          <p class="lead">Whether you need a shareable invoice, a printable report, a resume, or a saved copy of a webpage, dompdfui gives you an easy way to create PDFs while preserving CSS styles. It aims to help you complete a task rather than settings you don't need.</p>
+        </section>
+
+        <section id="how-it-helps">
+          <h2>How it helps people</h2>
+          <ul class="muted">
+            <li>Turn online content into offline copies you can keep or print.</li>
+            <li>Create professional-looking documents without design experience.</li>
+            <li>Save time: single-command export and consistent formatting across pages.</li>
+            <li>Automatically generate reports in HTML/CSS and save them in PDF.</li>
+          </ul>
+        </section>
+
+  </div>
+</body>
+</html>
